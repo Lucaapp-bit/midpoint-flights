@@ -1,0 +1,7 @@
+{
+  "name": "midpoint-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MidPoint Flights — cheapest third-city meeting point. Static frontend + Vercel serverless API.",
+  "engines": { "node": ">=18" }
+}
