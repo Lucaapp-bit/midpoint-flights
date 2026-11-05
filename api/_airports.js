@@ -188,6 +188,7 @@ function searchAirports(q, limit = 12) {
     const matched = list.filter((a) => airportMatches(a, s));
     if (score === null && matched.length) score = 3;
     if (score === null) continue;
+    if (list.some((a) => a.code.toLowerCase() === s)) score = 0; // exact IATA code wins
     hits.push({ city, country, list, score, order: order++, cityMatch: cityScore(city, country, s) !== null, matched });
   }
   hits.sort((x, y) => x.score - y.score || x.order - y.order);
