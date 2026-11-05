@@ -219,6 +219,7 @@ const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[
 const todayISO=()=>new Date().toISOString().slice(0,10);
 const plusDays=(base,n)=>{const d=new Date(base);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 
+const isLive=()=>!!state.provider&&!state.provider.startsWith("mock");
 // ---------- state ----------
 const state={a:null,b:null,nameA:"Tu",nameB:"Lei / Lui",depart:plusDays(todayISO(),30),ret:plusDays(todayISO(),33),roundTrip:true,nonStop:false,budget:"",loading:false,error:"",data:null,provider:HAS_API?null:"mock (offline)"};
 
@@ -275,7 +276,7 @@ function App(){
   // masthead
   page.append(el("div",{class:"masthead"},
     el("div",{class:"brand"},el("span",{class:"brand-mark"},el("i",{class:"mark-a"}),el("i",{class:"mark-b"})),"MidPoint"),
-    state.provider?el("span",{class:`provider provider-${state.provider.startsWith("amadeus")?"amadeus":"mock"}`},`dati: ${state.provider.startsWith("amadeus")?"amadeus":"demo"}`):null));
+    state.provider?el("span",{class:`provider provider-${isLive()?"amadeus":"mock"}`},`dati: ${isLive()?state.provider:"demo"}`):null));
 
   // hero
   page.append(el("section",{class:"hero"},
@@ -335,7 +336,7 @@ function App(){
   page.append(results);
 
   page.append(el("footer",{class:"site-foot"},el("span",{},"MidPoint · dimostrazione"),
-    el("span",{},state.provider&&state.provider.startsWith("amadeus")?"Tariffe live.":"Prezzi generati per la demo. Collega Amadeus per tariffe reali.")));
+    el("span",{},isLive()?"Tariffe live.":"Prezzi generati per la demo. Collega Duffel per tariffe reali.")));
 
   root.append(page);
 }
