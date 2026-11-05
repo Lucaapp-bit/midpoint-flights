@@ -1,13 +1,37 @@
-const { AIRPORTS, getAirport } = require("./_airports.js");
+const { getAirport, primaryAirports } = require("./_airports.js");
 const { priceLeg, providerName } = require("./_providers.js");
+
+const MAX_ORIGINS = 6;
+
+// Accepts "MXP" or ["MXP","LIN","BGY"]; returns a de-duplicated list of codes.
+function toCodes(v) {
+  const arr = Array.isArray(v) ? v : [v];
+  return [...new Set(arr.filter(Boolean).map((c) => String(c).trim().toUpperCase()))];
+}
+
+// Cheapest fare among all the airports the traveler is willing to leave from.
+async function cheapestLeg(origins, destination, opts) {
+  const legs = await Promise.all(
+    origins.map((origin) => priceLeg({ origin, destination, ...opts }))
+  );
+  let best = null;
+  for (const l of legs) {
+    if (l && (!best || l.price < best.price)) best = l;
+  }
+  return best;
+}
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Usa POST." });
   }
 
-  const body =
-    typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+  let body;
+  try {
+    body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+  } catch (e) {
+    return res.status(400).json({ error: "Body JSON non valido." });
+  }
   const {
     originA,
     originB,
@@ -18,22 +42,35 @@ module.exports = async (req, res) => {
     limit = 12
   } = body;
 
-  if (!originA || !originB || !departDate) {
+  const codesA = toCodes(originA);
+  const codesB = toCodes(originB);
+
+  if (!codesA.length || !codesB.length || !departDate) {
     return res.status(400).json({ error: "Servono originA, originB e departDate." });
   }
-  if (!getAirport(originA) || !getAirport(originB)) {
+  if (codesA.length > MAX_ORIGINS || codesB.length > MAX_ORIGINS) {
+    return res.status(400).json({ error: "Troppi aeroporti di partenza." });
+  }
+  if (![...codesA, ...codesB].every((c) => getAirport(c))) {
     return res.status(400).json({ error: "Aeroporto di partenza non valido." });
   }
-  if (originA === originB) {
+
+  const cityOf = (c) => getAirport(c).city;
+  const citiesA = new Set(codesA.map(cityOf));
+  const citiesB = new Set(codesB.map(cityOf));
+  if ([...citiesA].some((c) => citiesB.has(c))) {
     return res.status(400).json({ error: "Le due città devono essere diverse." });
   }
 
-  const destinations = AIRPORTS.filter(
-    (a) => a.code !== originA && a.code !== originB
-  ).map((a) => a.code);
+  // One candidate destination per city (its primary airport), excluding the origin cities.
+  const originCities = new Set([...citiesA, ...citiesB]);
+  const destinations = primaryAirports()
+    .filter((a) => !originCities.has(a.city))
+    .map((a) => a.code);
 
   const provider = providerName();
   const CONCURRENCY = provider === "duffel" ? 4 : 24;
+  const legOpts = { departDate, returnDate, nonStop };
   const results = [];
   let cursor = 0;
 
@@ -41,8 +78,8 @@ module.exports = async (req, res) => {
     while (cursor < destinations.length) {
       const dest = destinations[cursor++];
       const [fa, fb] = await Promise.all([
-        priceLeg({ origin: originA, destination: dest, departDate, returnDate, nonStop }),
-        priceLeg({ origin: originB, destination: dest, departDate, returnDate, nonStop })
+        cheapestLeg(codesA, dest, legOpts),
+        cheapestLeg(codesB, dest, legOpts)
       ]);
       if (!fa || !fb) continue;
 

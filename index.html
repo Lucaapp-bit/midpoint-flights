@@ -118,6 +118,13 @@ body{margin:0;background:radial-gradient(900px 500px at 12% -5%,rgba(240,147,43,
 .error{color:var(--warn);border-color:rgba(255,138,138,.4)}
 .site-foot{display:flex;justify-content:space-between;margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--mist);font-size:12.5px;position:relative;z-index:2}
 @media(max-width:680px){.cities{grid-template-columns:1fr}.converge{flex-direction:row;padding:4px 0}.converge .conv-line{width:16px;height:2px}.controls{grid-template-columns:1fr}.result-head{flex-direction:column}.result-total{text-align:left}.best-tag{align-self:flex-start}}
+.options li.group{background:rgba(201,166,255,.08);border-bottom:1px solid var(--line);margin-bottom:4px}
+.options li.group .opt-city{color:var(--meet)}
+.examples{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
+.examples-lbl{font-size:12.5px;color:var(--mist)}
+.example{background:transparent;border:1px dashed var(--line);color:var(--text-dim);padding:7px 13px;border-radius:999px;font-family:inherit;font-size:12.5px;cursor:pointer;transition:all .15s}
+.example:hover{border-color:var(--meet);color:var(--text)}
+.hint[hidden],.provider[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -125,92 +132,38 @@ body{margin:0;background:radial-gradient(900px 500px at 12% -5%,rgba(240,147,43,
 
 <script type="module">
 // ============================================================
-// MidPoint — vanilla JS (no build step). Works two ways:
-//  • Deployed on Vercel  -> calls /api/* (real serverless functions)
-//  • Opened as a file    -> falls back to the embedded mock below
+// MidPoint — vanilla JS (no build step). Calls the Vercel /api/* functions.
 // ============================================================
 
-const AIRPORTS = [
-  ["LHR","London","UK",51.47,-0.4543,1],["CDG","Paris","France",49.0097,2.5479,1],
-  ["AMS","Amsterdam","Netherlands",52.3105,4.7683,1],["FRA","Frankfurt","Germany",50.0379,8.5622,1],
-  ["MAD","Madrid","Spain",40.4936,-3.5668,1],["BCN","Barcelona","Spain",41.2974,2.0833,1],
-  ["FCO","Rome","Italy",41.8003,12.2389,1],["MXP","Milan","Italy",45.6306,8.7281,1],
-  ["MUC","Munich","Germany",48.3538,11.7861,1],["BER","Berlin","Germany",52.3667,13.5033,1],
-  ["VIE","Vienna","Austria",48.1103,16.5697,1],["ZRH","Zurich","Switzerland",47.4647,8.5492,0],
-  ["LIS","Lisbon","Portugal",38.7742,-9.1342,1],["OPO","Porto","Portugal",41.2481,-8.6814,0],
-  ["DUB","Dublin","Ireland",53.4213,-6.2701,1],["CPH","Copenhagen","Denmark",55.618,12.6508,1],
-  ["ARN","Stockholm","Sweden",59.6519,17.9186,0],["OSL","Oslo","Norway",60.1939,11.1004,0],
-  ["HEL","Helsinki","Finland",60.3172,24.9633,0],["PRG","Prague","Czechia",50.1008,14.26,1],
-  ["BUD","Budapest","Hungary",47.4369,19.2556,1],["WAW","Warsaw","Poland",52.1657,20.9671,1],
-  ["KRK","Krakow","Poland",50.0777,19.7848,0],["ATH","Athens","Greece",37.9364,23.9445,1],
-  ["IST","Istanbul","Turkey",41.2753,28.7519,1],["SAW","Istanbul (Sabiha)","Turkey",40.8986,29.3092,1],
-  ["BRU","Brussels","Belgium",50.9014,4.4844,1],["GVA","Geneva","Switzerland",46.2381,6.109,0],
-  ["EDI","Edinburgh","UK",55.95,-3.3725,0],["MAN","Manchester","UK",53.3537,-2.275,1],
-  ["NAP","Naples","Italy",40.886,14.2908,0],["VCE","Venice","Italy",45.5053,12.3519,0],
-  ["SVQ","Seville","Spain",37.418,-5.8931,0],["VLC","Valencia","Spain",39.4893,-0.4816,0],
-  ["PMI","Palma de Mallorca","Spain",39.5517,2.7388,0],["NCE","Nice","France",43.6584,7.2159,0],
-  ["LYS","Lyon","France",45.7256,5.0811,0],["HAM","Hamburg","Germany",53.6304,9.9882,0],
-  ["DUS","Dusseldorf","Germany",51.2895,6.7668,1],["GDN","Gdansk","Poland",54.3776,18.4662,0],
-  ["RIX","Riga","Latvia",56.9236,23.9711,0],["TLL","Tallinn","Estonia",59.4133,24.8328,0],
-  ["SOF","Sofia","Bulgaria",42.6952,23.4062,0],["OTP","Bucharest","Romania",44.5711,26.085,1],
-  ["ZAG","Zagreb","Croatia",45.7429,16.0688,0],["SPU","Split","Croatia",43.5389,16.2981,0],
-  ["TIA","Tirana","Albania",41.4147,19.7206,0],["MLA","Malta","Malta",35.8575,14.4775,0],
-  ["KEF","Reykjavik","Iceland",63.985,-22.6056,0]
-].map(([code,city,country,lat,lon,hub])=>({code,city,country,lat,lon,hub:!!hub}));
-
-const byCode = new Map(AIRPORTS.map(a=>[a.code,a]));
-const distanceKm=(a,b)=>{const R=6371,t=d=>d*Math.PI/180,dLat=t(b.lat-a.lat),dLon=t(b.lon-a.lon),h=Math.sin(dLat/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
-function seededRand(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}h^=h>>>13;return((h>>>0)%100000)/100000}
-
-function localSearchAirports(q){const s=(q||"").trim().toLowerCase();if(!s)return[];return AIRPORTS.filter(a=>a.city.toLowerCase().includes(s)||a.country.toLowerCase().includes(s)||a.code.toLowerCase()===s).slice(0,8)}
-
-function localMockPrice({origin,destination,departDate,returnDate,nonStop}){
-  const a=byCode.get(origin),b=byCode.get(destination);
-  if(!a||!b||origin===destination)return null;
-  const km=distanceKm(a,b);if(km<150)return null;
-  const r=seededRand(`${origin}-${destination}-${departDate}-${returnDate||"ow"}`);
-  const perKm=a.hub&&b.hub?0.055:(a.hub||b.hub?0.075:0.095);
-  let base=28+km*perKm;if(returnDate)base*=1.8;base*=0.65+r*0.7;
-  const dow=new Date(departDate).getUTCDay();if(dow===5||dow===6)base*=1.12;
-  const likelyDirect=km<2500&&(a.hub||b.hub);
-  if(nonStop&&!likelyDirect){if(r<0.5)return null;base*=1.25}
-  const durationMinutes=Math.round(45+km/12+(nonStop?0:70*r));
-  return{price:Math.round(base),currency:"EUR",nonStop:nonStop?true:(likelyDirect&&r>0.4),durationMinutes,origin,destination}
-}
-
-function localMeetingPoints({originA,originB,departDate,returnDate,nonStop,maxTotalBudget,limit}){
-  const dests=AIRPORTS.filter(a=>a.code!==originA&&a.code!==originB).map(a=>a.code);
-  const out=[];
-  for(const dest of dests){
-    const fa=localMockPrice({origin:originA,destination:dest,departDate,returnDate,nonStop});
-    const fb=localMockPrice({origin:originB,destination:dest,departDate,returnDate,nonStop});
-    if(!fa||!fb)continue;
-    const total=fa.price+fb.price;
-    if(maxTotalBudget&&total>Number(maxTotalBudget))continue;
-    const ap=byCode.get(dest),diff=Math.abs(fa.price-fb.price),fairness=total===0?1:1-diff/total;
-    out.push({destination:{code:dest,city:ap.city,country:ap.country},travelerA:fa,travelerB:fb,total,currency:fa.currency,priceDiff:diff,fairness:Number(fairness.toFixed(2)),combinedDurationMinutes:(fa.durationMinutes||0)+(fb.durationMinutes||0),bothNonStop:fa.nonStop&&fb.nonStop})
+const API = {
+  async search(q) {
+    try {
+      const r = await fetch(`/api/airports?q=${encodeURIComponent(q)}`);
+      if (!r.ok) throw new Error();
+      return await r.json();
+    } catch { return []; }
+  },
+  async meeting(payload) {
+    const r = await fetch("/api/meeting-points", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || "Errore nel calcolo");
+    return d;
+  },
+  async provider() {
+    try { const r = await fetch("/api/hello"); return (await r.json()).provider || null; }
+    catch { return null; }
   }
-  out.sort((x,y)=>x.total-y.total||y.fairness-x.fairness||x.combinedDurationMinutes-y.combinedDurationMinutes);
-  return{count:out.length,provider:"mock (offline)",results:out.slice(0,limit)}
-}
+};
 
-// If served over http(s) we have the API; if opened as file:// we don't.
-const HAS_API = location.protocol.startsWith("http");
-
-async function apiSearchAirports(q){
-  if(!HAS_API) return localSearchAirports(q);
-  try{const r=await fetch(`/api/airports?q=${encodeURIComponent(q)}`);if(!r.ok)throw 0;return await r.json()}
-  catch{return localSearchAirports(q)}
-}
-async function apiMeetingPoints(payload){
-  if(!HAS_API) return localMeetingPoints(payload);
-  try{
-    const r=await fetch("/api/meeting-points",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    const d=await r.json();if(!r.ok)throw new Error(d.error||"Errore");return d;
-  }catch(e){ // API missing/failing -> graceful offline fallback
-    return localMeetingPoints(payload);
-  }
-}
+// Percorsi di esempio (ognuno è una ricerca di testo: le città con più aeroporti li includono tutti)
+const EXAMPLES = [
+  ["Milano", "Londra"], ["Roma", "Berlino"], ["Istanbul", "Parigi"],
+  ["Madrid", "Atene"], ["Lisbona", "Varsavia"], ["Napoli", "Amsterdam"]
+];
 
 // ---------- tiny DOM helpers ----------
 const fmt=(n,c="EUR")=>new Intl.NumberFormat("it-IT",{style:"currency",currency:c,maximumFractionDigits:0}).format(n);
@@ -219,23 +172,65 @@ const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[
 const todayISO=()=>new Date().toISOString().slice(0,10);
 const plusDays=(base,n)=>{const d=new Date(base);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 
-const isLive=()=>!!state.provider&&!state.provider.startsWith("mock");
 // ---------- state ----------
-const state={a:null,b:null,nameA:"Tu",nameB:"Lei / Lui",depart:plusDays(todayISO(),30),ret:plusDays(todayISO(),33),roundTrip:true,nonStop:false,budget:"",loading:false,error:"",data:null,provider:HAS_API?null:"mock (offline)"};
+// state.a / state.b = selected option {codes:[...], text, ...}; state.textA/textB = what is typed in the field.
+const state={a:null,b:null,textA:"",textB:"",nameA:"Tu",nameB:"Lei / Lui",depart:plusDays(todayISO(),30),ret:plusDays(todayISO(),33),roundTrip:true,nonStop:false,budget:"",loading:false,error:"",data:null,provider:null};
+const isLive=()=>!!state.provider&&!state.provider.startsWith("mock");
+const sameCity=()=>state.a&&state.b&&state.a.city===state.b.city;
 
 // ---------- autocomplete input ----------
-function cityInput(traveler,label,onPick){
-  const wrap=el("div",{class:`city-input traveler-${traveler}`});
+// side: "a" | "b". The selection lives in state, so re-rendering the page never loses it.
+function cityInput(side,label,onChange){
+  const textKey=side==="a"?"textA":"textB";
+  const wrap=el("div",{class:`city-input traveler-${side}`});
   const lab=el("label",{},el("span",{class:"dot"}),label);
-  const input=el("input",{type:"text",placeholder:"Città o aeroporto…",autocomplete:"off","aria-label":label});
+  const input=el("input",{type:"text",placeholder:"Città o aeroporto…",autocomplete:"off","aria-label":label,value:state[textKey]});
   const list=el("ul",{class:"options",role:"listbox"});list.style.display="none";
-  let opts=[],active=0,timer;
-  const render=()=>{list.innerHTML="";if(!opts.length){list.style.display="none";return}list.style.display="block";
-    opts.forEach((a,i)=>{const li=el("li",{role:"option",class:i===active?"active":"",onmousedown:e=>{e.preventDefault();pick(a)},onmouseenter:()=>{active=i;render()}},el("span",{class:"opt-city"},a.city),el("span",{class:"opt-meta",html:`${a.country} · <code>${a.code}</code>`}));list.append(li)})};
-  const pick=a=>{onPick(a);input.value=`${a.city} (${a.code})`;opts=[];render()};
-  input.addEventListener("input",()=>{onPick(null);clearTimeout(timer);const q=input.value;timer=setTimeout(async()=>{if(q.length<2){opts=[];return render()}opts=await apiSearchAirports(q);active=0;render()},180)});
-  input.addEventListener("keydown",e=>{if(!opts.length)return;if(e.key==="ArrowDown"){e.preventDefault();active=Math.min(active+1,opts.length-1);render()}else if(e.key==="ArrowUp"){e.preventDefault();active=Math.max(active-1,0);render()}else if(e.key==="Enter"){e.preventDefault();pick(opts[active])}else if(e.key==="Escape"){opts=[];render()}});
-  document.addEventListener("mousedown",e=>{if(!wrap.contains(e.target)){opts=[];render()}});
+  let opts=[],active=0,timer,seq=0;
+
+  const paintActive=()=>[...list.children].forEach((li,i)=>li.classList.toggle("active",i===active));
+  const close=()=>{opts=[];list.innerHTML="";list.style.display="none"};
+  const open=()=>{
+    list.innerHTML="";
+    if(!opts.length){list.style.display="none";return}
+    list.style.display="block";
+    opts.forEach((o,i)=>{
+      const li=el("li",{role:"option",class:`${o.type==="city"?"group":""} ${i===active?"active":""}`,
+        onmousedown:e=>{e.preventDefault();pick(o)},
+        onmouseenter:()=>{active=i;paintActive()}},
+        el("span",{class:"opt-city"},o.label),
+        el("span",{class:"opt-meta"},o.sub));
+      list.append(li);
+    });
+  };
+  const pick=o=>{
+    state[side]=o;state[textKey]=o.text;input.value=o.text;close();onChange();
+  };
+  const search=async q=>{const my=++seq;const r=await API.search(q);return my===seq?r:null};
+
+  input.addEventListener("input",()=>{
+    state[side]=null;state[textKey]=input.value;onChange();
+    clearTimeout(timer);
+    const q=input.value.trim();
+    if(q.length<2){seq++;close();return}
+    timer=setTimeout(async()=>{const r=await search(q);if(r){opts=r;active=0;open()}},150);
+  });
+  input.addEventListener("keydown",e=>{
+    if(!opts.length)return;
+    if(e.key==="ArrowDown"){e.preventDefault();active=Math.min(active+1,opts.length-1);paintActive()}
+    else if(e.key==="ArrowUp"){e.preventDefault();active=Math.max(active-1,0);paintActive()}
+    else if(e.key==="Enter"||e.key==="Tab"){if(e.key==="Enter")e.preventDefault();pick(opts[active])}
+    else if(e.key==="Escape"){close()}
+  });
+  // Leaving the field with text typed but nothing chosen: take the best match.
+  input.addEventListener("blur",async()=>{
+    clearTimeout(timer);
+    const q=input.value.trim();
+    if(state[side]||q.length<2)return;
+    const r=await API.search(q);
+    if(!state[side]&&r.length&&input.value.trim()===q)pick(r[0]);
+  });
+  document.addEventListener("mousedown",e=>{if(!wrap.contains(e.target))close()});
   wrap.append(lab,input,list);return wrap;
 }
 
@@ -253,7 +248,7 @@ function resultCard(item,rank,labels){
   const fairClass=fairness>=0.75?"fair-hi":fairness>=0.5?"fair-mid":"fair-lo";
   const head=el("div",{class:"result-head"},
     el("div",{},el("h3",{},d.city),el("p",{class:"result-country",html:`${d.country} · <code>${d.code}</code>`})),
-    el("div",{class:"result-total"},el("span",{class:"total-num"},fmt(total,currency)),el("span",{class:"total-lbl"},"totale a/r combinato"),rank===0?el("span",{class:"best-tag"},"più conveniente"):null));
+    el("div",{class:"result-total"},el("span",{class:"total-num"},fmt(total,currency)),el("span",{class:"total-lbl"},"totale combinato"),rank===0?el("span",{class:"best-tag"},"più conveniente"):null));
   const split=el("div",{class:"split"},el("div",{class:"split-a"}),el("div",{class:"split-b"}));
   split.children[0].style.width=aShare+"%";split.children[1].style.width=(100-aShare)+"%";
   const foot=el("div",{class:"result-foot"},
@@ -266,6 +261,13 @@ function resultCard(item,rank,labels){
       el("div",{class:"legs"},leg("a",labels.a,A,currency),leg("b",labels.b,B,currency)),foot));
 }
 
+// ---------- provider badge (updated in place, never re-renders the form) ----------
+function paintProvider(){
+  const b=document.getElementById("prov"),f=document.getElementById("foot-note");
+  if(b){b.hidden=!state.provider;b.className=`provider provider-${isLive()?"amadeus":"mock"}`;b.textContent=`dati: ${isLive()?state.provider:"demo"}`}
+  if(f)f.textContent=isLive()?"Tariffe live.":"Prezzi generati per la demo. Collega Duffel per tariffe reali.";
+}
+
 // ---------- main render ----------
 const root=document.getElementById("root");
 function App(){
@@ -273,24 +275,27 @@ function App(){
   const page=el("div",{class:"page"});
   page.append(el("div",{class:"orbit orbit-a"}),el("div",{class:"orbit orbit-b"}));
 
-  // masthead
   page.append(el("div",{class:"masthead"},
     el("div",{class:"brand"},el("span",{class:"brand-mark"},el("i",{class:"mark-a"}),el("i",{class:"mark-b"})),"MidPoint"),
-    state.provider?el("span",{class:`provider provider-${isLive()?"amadeus":"mock"}`},`dati: ${isLive()?state.provider:"demo"}`):null));
+    el("span",{id:"prov",class:"provider"})));
 
-  // hero
   page.append(el("section",{class:"hero"},
     el("h1",{html:`Due partenze.<br><em>Un punto d'incontro</em><br>al prezzo più basso.`}),
     el("p",{class:"hero-sub",html:`Voi partite da città diverse e volete vedervi in una terza. MidPoint trova le destinazioni raggiungibili da entrambi e le ordina per <strong>costo totale dei due biglietti</strong>.`})));
 
-  // console
   const console_=el("section",{class:"console"});
-  const refreshGo=()=>{const ok=state.a&&state.b&&state.a.code!==state.b.code&&state.depart;go.disabled=!(ok&&!state.loading);
-    const w=console_.querySelector(".hint.warn");if(state.a&&state.b&&state.a.code===state.b.code){if(!w)console_.append(el("p",{class:"hint warn"},"Scegliete due città di partenza diverse."))}else if(w)w.remove()};
+  const go=el("button",{class:"go"},state.loading?"Cerco i punti d'incontro…":"Trova dove vedervi");
+  const warn=el("p",{class:"hint warn"},"Scegliete due città di partenza diverse.");
+  const refreshGo=()=>{
+    const ok=state.a&&state.b&&!sameCity()&&state.depart;
+    go.disabled=!(ok&&!state.loading);
+    warn.hidden=!sameCity();
+  };
+
   const cities=el("div",{class:"cities"});
-  cities.append(cityInput("a","Chi parte da qui",v=>{state.a=v;refreshGo()}),
+  cities.append(cityInput("a","Chi parte da qui",refreshGo),
     el("div",{class:"converge"},el("span",{class:"conv-line"}),el("span",{class:"conv-node"}),el("span",{class:"conv-line"})),
-    cityInput("b","…e chi da qui",v=>{state.b=v;refreshGo()}));
+    cityInput("b","…e chi da qui",refreshGo));
   console_.append(cities);
 
   const names=el("div",{class:"names"});
@@ -299,8 +304,10 @@ function App(){
   names.append(nA,nB);console_.append(names);
 
   const controls=el("div",{class:"controls"});
-  const dDep=el("input",{type:"date",value:state.depart,min:todayISO()});dDep.addEventListener("change",e=>state.depart=e.target.value);
-  const dRet=el("input",{type:"date",value:state.ret,min:state.depart});if(!state.roundTrip)dRet.disabled=true;dRet.addEventListener("change",e=>state.ret=e.target.value);
+  const dDep=el("input",{type:"date",value:state.depart,min:todayISO()});
+  const dRet=el("input",{type:"date",value:state.ret,min:state.depart});if(!state.roundTrip)dRet.disabled=true;
+  dDep.addEventListener("change",e=>{state.depart=e.target.value;dRet.min=state.depart;if(state.ret<state.depart){state.ret=state.depart;dRet.value=state.ret}refreshGo()});
+  dRet.addEventListener("change",e=>state.ret=e.target.value);
   const bud=el("input",{type:"number",placeholder:"nessun limite",min:"0",value:state.budget});bud.addEventListener("input",e=>state.budget=e.target.value);
   controls.append(el("label",{class:"ctl"},el("span",{},"Andata"),dDep),el("label",{class:"ctl"},el("span",{},"Ritorno"),dRet),el("label",{class:"ctl budget"},el("span",{},"Budget totale max"),bud));
   console_.append(controls);
@@ -312,16 +319,20 @@ function App(){
   tNS.addEventListener("click",()=>{state.nonStop=!state.nonStop;App()});
   toggles.append(tRT,tNS);console_.append(toggles);
 
-  const go=el("button",{class:"go"},state.loading?"Cerco i punti d'incontro…":"Trova dove vedervi");
-  const canSearch=state.a&&state.b&&state.a.code!==state.b.code&&state.depart;
-  if(!canSearch||state.loading)go.disabled=true;
+  // esempi cliccabili
+  const ex=el("div",{class:"examples"},el("span",{class:"examples-lbl"},"Prova con:"));
+  EXAMPLES.forEach(([x,y])=>ex.append(el("button",{type:"button",class:"example",onclick:async()=>{
+    const [ra,rb]=await Promise.all([API.search(x),API.search(y)]);
+    if(!ra[0]||!rb[0])return;
+    state.a=ra[0];state.textA=ra[0].text;state.b=rb[0];state.textB=rb[0].text;state.data=null;state.error="";App();
+  }},`${x} ↔ ${y}`)));
+  console_.append(ex);
+
   go.addEventListener("click",run);
-  console_.append(go);
-  if(state.a&&state.b&&state.a.code===state.b.code)console_.append(el("p",{class:"hint warn"},"Scegliete due città di partenza diverse."));
+  console_.append(go,warn);
   refreshGo();
   page.append(console_);
 
-  // results
   const results=el("section",{class:"results"});
   if(state.error)results.append(el("p",{class:"error"},state.error));
   if(state.loading){const sk=el("div",{class:"skeletons"});[0,1,2].forEach(()=>sk.append(el("div",{class:"skeleton"})));results.append(sk)}
@@ -335,26 +346,23 @@ function App(){
   }
   page.append(results);
 
-  page.append(el("footer",{class:"site-foot"},el("span",{},"MidPoint · dimostrazione"),
-    el("span",{},isLive()?"Tariffe live.":"Prezzi generati per la demo. Collega Duffel per tariffe reali.")));
-
+  page.append(el("footer",{class:"site-foot"},el("span",{},"MidPoint · dimostrazione"),el("span",{id:"foot-note"})));
   root.append(page);
+  paintProvider();
 }
 
 async function run(){
-  if(!(state.a&&state.b&&state.a.code!==state.b.code&&state.depart))return;
+  if(!(state.a&&state.b&&!sameCity()&&state.depart))return;
   state.loading=true;state.error="";state.data=null;App();
   try{
-    const res=await apiMeetingPoints({originA:state.a.code,originB:state.b.code,departDate:state.depart,returnDate:state.roundTrip?state.ret:null,nonStop:state.nonStop,maxTotalBudget:state.budget?Number(state.budget):null,limit:12});
+    const res=await API.meeting({originA:state.a.codes,originB:state.b.codes,departDate:state.depart,returnDate:state.roundTrip?state.ret:null,nonStop:state.nonStop,maxTotalBudget:state.budget?Number(state.budget):null,limit:12});
     state.data=res;if(res.provider)state.provider=res.provider;
   }catch(e){state.error=e.message}
   finally{state.loading=false;App()}
 }
 
-// probe provider on load (only if API present)
-if(HAS_API){fetch("/api/airports?q=ist").then(r=>r.ok?fetch("/api/meeting-points",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({originA:"IST",originB:"LHR",departDate:state.depart,limit:1})}):null).then(r=>r&&r.json()).then(d=>{if(d&&d.provider){state.provider=d.provider;App()}}).catch(()=>{})}
-
 App();
+API.provider().then(p=>{if(p){state.provider=p;paintProvider()}});
 </script>
 </body>
 </html>

@@ -1,59 +1,146 @@
 // Curated airport list shared by the API. Coordinates power mock pricing;
 // `hub` weights an airport toward cheaper fares (more competition).
-const AIRPORTS = [
-  { code: "LHR", city: "London", country: "UK", lat: 51.47, lon: -0.4543, hub: true },
-  { code: "CDG", city: "Paris", country: "France", lat: 49.0097, lon: 2.5479, hub: true },
-  { code: "AMS", city: "Amsterdam", country: "Netherlands", lat: 52.3105, lon: 4.7683, hub: true },
-  { code: "FRA", city: "Frankfurt", country: "Germany", lat: 50.0379, lon: 8.5622, hub: true },
-  { code: "MAD", city: "Madrid", country: "Spain", lat: 40.4936, lon: -3.5668, hub: true },
-  { code: "BCN", city: "Barcelona", country: "Spain", lat: 41.2974, lon: 2.0833, hub: true },
-  { code: "FCO", city: "Rome", country: "Italy", lat: 41.8003, lon: 12.2389, hub: true },
-  { code: "MXP", city: "Milan", country: "Italy", lat: 45.6306, lon: 8.7281, hub: true },
-  { code: "MUC", city: "Munich", country: "Germany", lat: 48.3538, lon: 11.7861, hub: true },
-  { code: "BER", city: "Berlin", country: "Germany", lat: 52.3667, lon: 13.5033, hub: true },
-  { code: "VIE", city: "Vienna", country: "Austria", lat: 48.1103, lon: 16.5697, hub: true },
-  { code: "ZRH", city: "Zurich", country: "Switzerland", lat: 47.4647, lon: 8.5492, hub: false },
-  { code: "LIS", city: "Lisbon", country: "Portugal", lat: 38.7742, lon: -9.1342, hub: true },
-  { code: "OPO", city: "Porto", country: "Portugal", lat: 41.2481, lon: -8.6814, hub: false },
-  { code: "DUB", city: "Dublin", country: "Ireland", lat: 53.4213, lon: -6.2701, hub: true },
-  { code: "CPH", city: "Copenhagen", country: "Denmark", lat: 55.618, lon: 12.6508, hub: true },
-  { code: "ARN", city: "Stockholm", country: "Sweden", lat: 59.6519, lon: 17.9186, hub: false },
-  { code: "OSL", city: "Oslo", country: "Norway", lat: 60.1939, lon: 11.1004, hub: false },
-  { code: "HEL", city: "Helsinki", country: "Finland", lat: 60.3172, lon: 24.9633, hub: false },
-  { code: "PRG", city: "Prague", country: "Czechia", lat: 50.1008, lon: 14.26, hub: true },
-  { code: "BUD", city: "Budapest", country: "Hungary", lat: 47.4369, lon: 19.2556, hub: true },
-  { code: "WAW", city: "Warsaw", country: "Poland", lat: 52.1657, lon: 20.9671, hub: true },
-  { code: "KRK", city: "Krakow", country: "Poland", lat: 50.0777, lon: 19.7848, hub: false },
-  { code: "ATH", city: "Athens", country: "Greece", lat: 37.9364, lon: 23.9445, hub: true },
-  { code: "IST", city: "Istanbul", country: "Turkey", lat: 41.2753, lon: 28.7519, hub: true },
-  { code: "SAW", city: "Istanbul (Sabiha)", country: "Turkey", lat: 40.8986, lon: 29.3092, hub: true },
-  { code: "BRU", city: "Brussels", country: "Belgium", lat: 50.9014, lon: 4.4844, hub: true },
-  { code: "GVA", city: "Geneva", country: "Switzerland", lat: 46.2381, lon: 6.109, hub: false },
-  { code: "EDI", city: "Edinburgh", country: "UK", lat: 55.95, lon: -3.3725, hub: false },
-  { code: "MAN", city: "Manchester", country: "UK", lat: 53.3537, lon: -2.275, hub: true },
-  { code: "NAP", city: "Naples", country: "Italy", lat: 40.886, lon: 14.2908, hub: false },
-  { code: "VCE", city: "Venice", country: "Italy", lat: 45.5053, lon: 12.3519, hub: false },
-  { code: "SVQ", city: "Seville", country: "Spain", lat: 37.418, lon: -5.8931, hub: false },
-  { code: "VLC", city: "Valencia", country: "Spain", lat: 39.4893, lon: -0.4816, hub: false },
-  { code: "PMI", city: "Palma de Mallorca", country: "Spain", lat: 39.5517, lon: 2.7388, hub: false },
-  { code: "NCE", city: "Nice", country: "France", lat: 43.6584, lon: 7.2159, hub: false },
-  { code: "LYS", city: "Lyon", country: "France", lat: 45.7256, lon: 5.0811, hub: false },
-  { code: "HAM", city: "Hamburg", country: "Germany", lat: 53.6304, lon: 9.9882, hub: false },
-  { code: "DUS", city: "Dusseldorf", country: "Germany", lat: 51.2895, lon: 6.7668, hub: true },
-  { code: "GDN", city: "Gdansk", country: "Poland", lat: 54.3776, lon: 18.4662, hub: false },
-  { code: "RIX", city: "Riga", country: "Latvia", lat: 56.9236, lon: 23.9711, hub: false },
-  { code: "TLL", city: "Tallinn", country: "Estonia", lat: 59.4133, lon: 24.8328, hub: false },
-  { code: "SOF", city: "Sofia", country: "Bulgaria", lat: 42.6952, lon: 23.4062, hub: false },
-  { code: "OTP", city: "Bucharest", country: "Romania", lat: 44.5711, lon: 26.085, hub: true },
-  { code: "ZAG", city: "Zagreb", country: "Croatia", lat: 45.7429, lon: 16.0688, hub: false },
-  { code: "SPU", city: "Split", country: "Croatia", lat: 43.5389, lon: 16.2981, hub: false },
-  { code: "TIA", city: "Tirana", country: "Albania", lat: 41.4147, lon: 19.7206, hub: false },
-  { code: "MLA", city: "Malta", country: "Malta", lat: 35.8575, lon: 14.4775, hub: false },
-  { code: "KEF", city: "Reykjavik", country: "Iceland", lat: 63.985, lon: -22.6056, hub: false }
+// Several airports can share the same `city` (e.g. Milan: MXP, LIN, BGY):
+// searching by city returns a group option covering all of them.
+
+// [code, city, country, lat, lon, hub, name]
+const ROWS = [
+  ["LHR", "London", "UK", 51.47, -0.4543, 1, "Heathrow"],
+  ["LGW", "London", "UK", 51.1537, -0.1821, 1, "Gatwick"],
+  ["STN", "London", "UK", 51.885, 0.235, 0, "Stansted"],
+  ["LTN", "London", "UK", 51.8747, -0.3683, 0, "Luton"],
+  ["LCY", "London", "UK", 51.5053, 0.0553, 0, "City"],
+  ["CDG", "Paris", "France", 49.0097, 2.5479, 1, "Charles de Gaulle"],
+  ["ORY", "Paris", "France", 48.7233, 2.3794, 1, "Orly"],
+  ["AMS", "Amsterdam", "Netherlands", 52.3105, 4.7683, 1, "Schiphol"],
+  ["FRA", "Frankfurt", "Germany", 50.0379, 8.5622, 1, "Frankfurt"],
+  ["HHN", "Frankfurt", "Germany", 49.9487, 7.2639, 0, "Hahn"],
+  ["MAD", "Madrid", "Spain", 40.4936, -3.5668, 1, "Barajas"],
+  ["BCN", "Barcelona", "Spain", 41.2974, 2.0833, 1, "El Prat"],
+  ["FCO", "Rome", "Italy", 41.8003, 12.2389, 1, "Fiumicino"],
+  ["CIA", "Rome", "Italy", 41.7994, 12.5949, 0, "Ciampino"],
+  ["MXP", "Milan", "Italy", 45.6306, 8.7281, 1, "Malpensa"],
+  ["LIN", "Milan", "Italy", 45.4451, 9.2767, 0, "Linate"],
+  ["BGY", "Milan", "Italy", 45.6739, 9.7042, 0, "Bergamo Orio al Serio"],
+  ["MUC", "Munich", "Germany", 48.3538, 11.7861, 1, "Munich"],
+  ["BER", "Berlin", "Germany", 52.3667, 13.5033, 1, "Brandenburg"],
+  ["VIE", "Vienna", "Austria", 48.1103, 16.5697, 1, "Schwechat"],
+  ["ZRH", "Zurich", "Switzerland", 47.4647, 8.5492, 0, "Zurich"],
+  ["LIS", "Lisbon", "Portugal", 38.7742, -9.1342, 1, "Humberto Delgado"],
+  ["OPO", "Porto", "Portugal", 41.2481, -8.6814, 0, "Francisco Sá Carneiro"],
+  ["FAO", "Faro", "Portugal", 37.0144, -7.9659, 0, "Faro"],
+  ["DUB", "Dublin", "Ireland", 53.4213, -6.2701, 1, "Dublin"],
+  ["CPH", "Copenhagen", "Denmark", 55.618, 12.6508, 1, "Kastrup"],
+  ["ARN", "Stockholm", "Sweden", 59.6519, 17.9186, 0, "Arlanda"],
+  ["GOT", "Gothenburg", "Sweden", 57.6628, 12.2798, 0, "Landvetter"],
+  ["OSL", "Oslo", "Norway", 60.1939, 11.1004, 0, "Gardermoen"],
+  ["BGO", "Bergen", "Norway", 60.2934, 5.2181, 0, "Flesland"],
+  ["HEL", "Helsinki", "Finland", 60.3172, 24.9633, 0, "Vantaa"],
+  ["PRG", "Prague", "Czechia", 50.1008, 14.26, 1, "Václav Havel"],
+  ["BUD", "Budapest", "Hungary", 47.4369, 19.2556, 1, "Ferenc Liszt"],
+  ["WAW", "Warsaw", "Poland", 52.1657, 20.9671, 1, "Chopin"],
+  ["WMI", "Warsaw", "Poland", 52.4511, 20.6518, 0, "Modlin"],
+  ["KRK", "Krakow", "Poland", 50.0777, 19.7848, 0, "Balice"],
+  ["GDN", "Gdansk", "Poland", 54.3776, 18.4662, 0, "Lech Wałęsa"],
+  ["ATH", "Athens", "Greece", 37.9364, 23.9445, 1, "Eleftherios Venizelos"],
+  ["SKG", "Thessaloniki", "Greece", 40.5197, 22.9709, 0, "Makedonia"],
+  ["IST", "Istanbul", "Turkey", 41.2753, 28.7519, 1, "Istanbul Airport"],
+  ["SAW", "Istanbul", "Turkey", 40.8986, 29.3092, 1, "Sabiha Gökçen"],
+  ["AYT", "Antalya", "Turkey", 36.8987, 30.8005, 0, "Antalya"],
+  ["ADB", "Izmir", "Turkey", 38.2924, 27.157, 0, "Adnan Menderes"],
+  ["BRU", "Brussels", "Belgium", 50.9014, 4.4844, 1, "Zaventem"],
+  ["CRL", "Brussels", "Belgium", 50.4592, 4.4538, 0, "Charleroi"],
+  ["GVA", "Geneva", "Switzerland", 46.2381, 6.109, 0, "Geneva"],
+  ["EDI", "Edinburgh", "UK", 55.95, -3.3725, 0, "Edinburgh"],
+  ["MAN", "Manchester", "UK", 53.3537, -2.275, 1, "Manchester"],
+  ["NAP", "Naples", "Italy", 40.886, 14.2908, 0, "Capodichino"],
+  ["VCE", "Venice", "Italy", 45.5053, 12.3519, 0, "Marco Polo"],
+  ["TSF", "Venice", "Italy", 45.6484, 12.1944, 0, "Treviso"],
+  ["BLQ", "Bologna", "Italy", 44.5354, 11.2887, 0, "Guglielmo Marconi"],
+  ["PSA", "Pisa", "Italy", 43.6839, 10.3927, 0, "Galileo Galilei"],
+  ["FLR", "Florence", "Italy", 43.81, 11.2051, 0, "Peretola"],
+  ["TRN", "Turin", "Italy", 45.2008, 7.6496, 0, "Caselle"],
+  ["VRN", "Verona", "Italy", 45.3957, 10.8885, 0, "Villafranca"],
+  ["BRI", "Bari", "Italy", 41.1389, 16.7606, 0, "Karol Wojtyła"],
+  ["CTA", "Catania", "Italy", 37.4668, 15.0664, 0, "Fontanarossa"],
+  ["PMO", "Palermo", "Italy", 38.176, 13.091, 0, "Falcone-Borsellino"],
+  ["SVQ", "Seville", "Spain", 37.418, -5.8931, 0, "San Pablo"],
+  ["VLC", "Valencia", "Spain", 39.4893, -0.4816, 0, "Valencia"],
+  ["AGP", "Malaga", "Spain", 36.6749, -4.4991, 0, "Costa del Sol"],
+  ["ALC", "Alicante", "Spain", 38.2822, -0.5582, 0, "Alicante-Elche"],
+  ["BIO", "Bilbao", "Spain", 43.3011, -2.9106, 0, "Bilbao"],
+  ["IBZ", "Ibiza", "Spain", 38.8729, 1.3731, 0, "Ibiza"],
+  ["PMI", "Palma de Mallorca", "Spain", 39.5517, 2.7388, 0, "Son Sant Joan"],
+  ["NCE", "Nice", "France", 43.6584, 7.2159, 0, "Côte d'Azur"],
+  ["LYS", "Lyon", "France", 45.7256, 5.0811, 0, "Saint-Exupéry"],
+  ["MRS", "Marseille", "France", 43.4393, 5.2214, 0, "Provence"],
+  ["TLS", "Toulouse", "France", 43.6291, 1.3638, 0, "Blagnac"],
+  ["HAM", "Hamburg", "Germany", 53.6304, 9.9882, 0, "Hamburg"],
+  ["DUS", "Dusseldorf", "Germany", 51.2895, 6.7668, 1, "Dusseldorf"],
+  ["CGN", "Cologne", "Germany", 50.8659, 7.1427, 0, "Cologne Bonn"],
+  ["STR", "Stuttgart", "Germany", 48.6899, 9.222, 0, "Stuttgart"],
+  ["RIX", "Riga", "Latvia", 56.9236, 23.9711, 0, "Riga"],
+  ["TLL", "Tallinn", "Estonia", 59.4133, 24.8328, 0, "Lennart Meri"],
+  ["VNO", "Vilnius", "Lithuania", 54.6341, 25.2858, 0, "Vilnius"],
+  ["SOF", "Sofia", "Bulgaria", 42.6952, 23.4062, 0, "Sofia"],
+  ["OTP", "Bucharest", "Romania", 44.5711, 26.085, 1, "Henri Coandă"],
+  ["BEG", "Belgrade", "Serbia", 44.8184, 20.3091, 0, "Nikola Tesla"],
+  ["ZAG", "Zagreb", "Croatia", 45.7429, 16.0688, 0, "Franjo Tuđman"],
+  ["SPU", "Split", "Croatia", 43.5389, 16.2981, 0, "Split"],
+  ["DBV", "Dubrovnik", "Croatia", 42.5614, 18.2682, 0, "Dubrovnik"],
+  ["LJU", "Ljubljana", "Slovenia", 46.2237, 14.4576, 0, "Jože Pučnik"],
+  ["BTS", "Bratislava", "Slovakia", 48.1702, 17.2127, 0, "M. R. Štefánik"],
+  ["TIA", "Tirana", "Albania", 41.4147, 19.7206, 0, "Rinas"],
+  ["MLA", "Malta", "Malta", 35.8575, 14.4775, 0, "Luqa"],
+  ["LCA", "Larnaca", "Cyprus", 34.8751, 33.6249, 0, "Larnaca"],
+  ["KEF", "Reykjavik", "Iceland", 63.985, -22.6056, 0, "Keflavík"]
 ];
+
+// Italian / local spellings so "Milano", "Londra", "Monaco" … are found.
+const CITY_ALIASES = {
+  London: ["londra"], Paris: ["parigi"], Milan: ["milano"], Rome: ["roma"],
+  Venice: ["venezia"], Naples: ["napoli"], Florence: ["firenze"], Turin: ["torino"],
+  Munich: ["monaco", "monaco di baviera", "muenchen"], Vienna: ["wien"],
+  Prague: ["praga"], Athens: ["atene"], Lisbon: ["lisbona"], Berlin: ["berlino"],
+  Copenhagen: ["copenaghen"], Warsaw: ["varsavia"], Krakow: ["cracovia"],
+  Brussels: ["bruxelles", "bruselas"], Geneva: ["ginevra"], Zurich: ["zurigo"],
+  Seville: ["siviglia", "sevilla"], "Palma de Mallorca": ["maiorca", "majorca", "mallorca", "palma"],
+  Nice: ["nizza"], Lyon: ["lione"], Hamburg: ["amburgo"], Cologne: ["colonia", "koln"],
+  Bucharest: ["bucarest"], Marseille: ["marsiglia"], Belgrade: ["belgrado"],
+  Edinburgh: ["edimburgo"], Dublin: ["dublino"], Stockholm: ["stoccolma"],
+  Frankfurt: ["francoforte"], Gdansk: ["danzica"], Zagreb: ["zagabria"],
+  Dubrovnik: ["ragusa"], Thessaloniki: ["salonicco"], Ljubljana: ["lubiana"],
+  Izmir: ["smirne"], Malaga: ["malaga"], Malta: ["la valletta", "valletta"],
+  Gothenburg: ["goteborg", "gotemburgo"], Toulouse: ["tolosa"], Valencia: ["valenza"],
+  Tallinn: ["tallin"], Vilnius: ["vilna"], Reykjavik: ["reykjavik"]
+};
+
+const COUNTRY_ALIASES = {
+  Italy: ["italia"], Spain: ["spagna"], Germany: ["germania"], France: ["francia"],
+  UK: ["regno unito", "inghilterra", "united kingdom", "england"], Greece: ["grecia"],
+  Turkey: ["turchia", "turkiye"], Portugal: ["portogallo"], Netherlands: ["olanda", "paesi bassi"],
+  Switzerland: ["svizzera"], Poland: ["polonia"], Czechia: ["repubblica ceca", "cechia"],
+  Hungary: ["ungheria"], Denmark: ["danimarca"], Sweden: ["svezia"], Norway: ["norvegia"],
+  Finland: ["finlandia"], Ireland: ["irlanda"], Belgium: ["belgio"], Croatia: ["croazia"],
+  Iceland: ["islanda"], Latvia: ["lettonia"], Lithuania: ["lituania"], Slovenia: ["slovenia"],
+  Slovakia: ["slovacchia"], Cyprus: ["cipro"], Romania: ["romania"], Bulgaria: ["bulgaria"],
+  Serbia: ["serbia"], Albania: ["albania"], Estonia: ["estonia"], Austria: ["austria"]
+};
+
+const AIRPORTS = ROWS.map(([code, city, country, lat, lon, hub, name]) => ({
+  code, city, country, lat, lon, hub: !!hub, name
+}));
 
 const byCode = new Map(AIRPORTS.map((a) => [a.code, a]));
 const getAirport = (code) => byCode.get(code);
+
+// city -> airports (insertion order = order in ROWS; first one is the "primary")
+const byCity = new Map();
+for (const a of AIRPORTS) {
+  if (!byCity.has(a.city)) byCity.set(a.city, []);
+  byCity.get(a.city).push(a);
+}
+const primaryAirports = () => [...byCity.values()].map((list) => list[0]);
 
 function distanceKm(a, b) {
   const R = 6371;
@@ -66,15 +153,87 @@ function distanceKm(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-function searchAirports(q, limit = 8) {
-  const s = (q || "").trim().toLowerCase();
-  if (!s) return [];
-  return AIRPORTS.filter(
-    (a) =>
-      a.city.toLowerCase().includes(s) ||
-      a.country.toLowerCase().includes(s) ||
-      a.code.toLowerCase() === s
-  ).slice(0, limit);
+const norm = (s) =>
+  String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+// "Milan Malpensa", but just "Istanbul Airport" (no repeated city name)
+const fullName = (a) => (norm(a.name).startsWith(norm(a.city)) ? a.name : `${a.city} ${a.name}`);
+
+function cityScore(city, country, s) {
+  const names = [city, ...(CITY_ALIASES[city] || [])].map(norm);
+  if (names.some((n) => n === s)) return 0;
+  if (names.some((n) => n.startsWith(s))) return 1;
+  if (names.some((n) => n.includes(s))) return 2;
+  const countries = [country, ...(COUNTRY_ALIASES[country] || [])].map(norm);
+  if (countries.some((n) => n.startsWith(s))) return 4;
+  return null;
 }
 
-module.exports = { AIRPORTS, getAirport, distanceKm, searchAirports };
+function airportMatches(a, s) {
+  const code = a.code.toLowerCase();
+  if (code === s || (s.length >= 2 && code.startsWith(s))) return true;
+  return norm(a.name).includes(s);
+}
+
+// Returns options: a "city" group (all airports) first when the city has
+// several airports, followed by the individual airports.
+function searchAirports(q, limit = 12) {
+  const s = norm(q);
+  if (!s) return [];
+  const hits = [];
+  let order = 0;
+  for (const [city, list] of byCity) {
+    const country = list[0].country;
+    let score = cityScore(city, country, s);
+    const matched = list.filter((a) => airportMatches(a, s));
+    if (score === null && matched.length) score = 3;
+    if (score === null) continue;
+    hits.push({ city, country, list, score, order: order++, cityMatch: cityScore(city, country, s) !== null, matched });
+  }
+  hits.sort((x, y) => x.score - y.score || x.order - y.order);
+
+  const out = [];
+  for (const h of hits) {
+    const codes = h.list.map((a) => a.code);
+    const airports = h.cityMatch ? h.list : h.matched;
+    if (h.list.length > 1) {
+      if (h.cityMatch) out.push({
+        type: "city",
+        city: h.city,
+        country: h.country,
+        codes,
+        label: `${h.city} — tutti gli aeroporti`,
+        sub: `${h.country} · ${codes.join(" · ")}`,
+        text: `${h.city} (${codes.join(", ")})`
+      });
+      for (const a of airports) {
+        out.push({
+          type: "airport",
+          code: a.code,
+          city: a.city,
+          country: a.country,
+          codes: [a.code],
+          label: fullName(a),
+          sub: `${a.country} · ${a.code}`,
+          text: `${fullName(a)} (${a.code})`
+        });
+      }
+    } else {
+      const a = h.list[0];
+      out.push({
+        type: "airport",
+        code: a.code,
+        city: a.city,
+        country: a.country,
+        codes: [a.code],
+        label: a.city,
+        sub: `${a.country} · ${a.code}`,
+        text: `${a.city} (${a.code})`
+      });
+    }
+    if (out.length >= limit) break;
+  }
+  return out.slice(0, limit);
+}
+
+module.exports = { AIRPORTS, getAirport, distanceKm, searchAirports, primaryAirports };
