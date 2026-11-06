@@ -550,7 +550,7 @@ function paintCaption() {
 function paintProvider() {
   const b = document.getElementById("prov"), f = document.getElementById("foot-note");
   if (b) { b.hidden = !state.provider; b.classList.toggle("live", isLive()); b.textContent = isLive() ? "Tariffe reali" : "Prezzi di prova"; }
-  if (f) f.textContent = isLive() ? "Tariffe reali da Duffel." : (state.testMode ? "Duffel è in modalità test: i prezzi non sono reali." : "Prezzi di prova. Con un fornitore reale collegato diventano tariffe vere.");
+  if (f) f.textContent = isLive() ? (state.provider === "travelpayouts" ? "Prezzi reali trovati di recente su Aviasales: sono indicativi, verifica prima di prenotare." : "Tariffe reali da Duffel.") : (state.testMode ? "Duffel è in modalità test: i prezzi non sono reali." : "Prezzi di prova. Con un fornitore reale collegato diventano tariffe vere.");
 }
 
 // ---------- page ----------

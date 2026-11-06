@@ -1,5 +1,6 @@
 const { getAirport, distanceKm, primaryAirports, itCity, itCountry } = require("./_airports.js");
 const { priceLeg, providerName, isTestMode } = require("./_providers.js");
+const { farePerDestination, CITY_CODES } = require("./_travelpayouts.js");
 
 const MAX_ORIGINS = 6;
 const REAL_CANDIDATES = 12; // cities priced with a live provider (each costs real API calls)
@@ -45,6 +46,51 @@ async function cheapestLeg(origins, destination, opts) {
   return best;
 }
 
+function buildResult(dest, fa, fb) {
+  const airport = getAirport(dest);
+  const total = fa.price + fb.price;
+  const diff = Math.abs(fa.price - fb.price);
+  const fairness = total === 0 ? 1 : 1 - diff / total;
+  return {
+    destination: { code: dest, city: itCity(airport.city), country: itCountry(airport.country) },
+    travelerA: fa,
+    travelerB: fb,
+    total,
+    currency: fa.currency,
+    priceDiff: diff,
+    fairness: Number(fairness.toFixed(2)),
+    combinedDurationMinutes: (fa.durationMinutes || 0) + (fb.durationMinutes || 0),
+    bothNonStop: fa.nonStop && fb.nonStop
+  };
+}
+
+// Travelpayouts answers per origin with every destination at once.
+async function bulkSearch(codesA, codesB, originCities, opts) {
+  const resolve = (code) => {
+    const a = getAirport(code) || primaryAirports().find((x) => x.city === CITY_CODES[code]);
+    return a && !originCities.has(a.city) ? a.code : null;
+  };
+  const run = async (o) => {
+    const [ma, mb] = await Promise.all([farePerDestination(codesA, o), farePerDestination(codesB, o)]);
+    const out = new Map();
+    for (const [code, fa] of ma) {
+      const fb = mb.get(code);
+      const dest = fb && resolve(code);
+      if (dest && !out.has(dest)) out.set(dest, [fa, fb]);
+    }
+    return { out, found: ma.size + mb.size };
+  };
+  let r = await run(opts);
+  // Cached fares are sparse for one exact day: widen to the whole month.
+  if (r.out.size < 6 && /^\d{4}-\d{2}-\d{2}$/.test(opts.departDate)) {
+    const wide = { ...opts, departDate: opts.departDate.slice(0, 7),
+      returnDate: opts.returnDate ? opts.returnDate.slice(0, 7) : undefined };
+    const r2 = await run(wide);
+    if (r2.out.size > r.out.size) r = { ...r2, widened: true };
+  }
+  return r;
+}
+
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Usa POST." });
@@ -88,11 +134,34 @@ module.exports = async (req, res) => {
 
   // One candidate destination per city (its primary airport), excluding the origin cities.
   const originCities = new Set([...citiesA, ...citiesB]);
+  const provider = providerName();
+
+  if (provider === "travelpayouts") {
+    try {
+      const { out, widened } = await bulkSearch(codesA, codesB, originCities, { departDate, returnDate, nonStop });
+      const results = [];
+      for (const [dest, [fa, fb]] of out) {
+        const r = buildResult(dest, fa, fb);
+        if (maxTotalBudget && r.total > Number(maxTotalBudget)) continue;
+        results.push(r);
+      }
+      results.sort((x, y) => x.total - y.total || y.fairness - x.fairness ||
+        x.combinedDurationMinutes - y.combinedDurationMinutes);
+      return res.status(200).json({
+        count: results.length, provider, real: true, cached: true, widened: !!widened,
+        searched: results.length, considered: results.length, partial: false,
+        results: results.slice(0, Number(limit))
+      });
+    } catch (e) {
+      console.error("[meeting-points]", e.message);
+      return res.status(502).json({ error: "Il servizio dei prezzi non risponde. Riprova tra poco." });
+    }
+  }
+
   let destinations = primaryAirports()
     .filter((a) => !originCities.has(a.city))
     .map((a) => a.code);
 
-  const provider = providerName();
   const real = provider !== "mock";
   const considered = destinations.length;
   if (real) destinations = pickCandidates(destinations, codesA, codesB, REAL_CANDIDATES);

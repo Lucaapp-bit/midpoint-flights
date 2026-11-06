@@ -44,9 +44,16 @@ function mockPrice({ origin, destination, departDate, returnDate, nonStop }) {
   };
 }
 
+// FLIGHT_PROVIDER picks one explicitly; otherwise whichever token is present
+// (Travelpayouts first: it covers the whole world in one call per origin).
 function providerName() {
-  const kind = (process.env.FLIGHT_PROVIDER || "mock").toLowerCase();
-  if (kind === "duffel" && process.env.DUFFEL_TOKEN) return "duffel";
+  const kind = (process.env.FLIGHT_PROVIDER || "").toLowerCase();
+  const tp = !!process.env.TRAVELPAYOUTS_TOKEN, df = !!process.env.DUFFEL_TOKEN;
+  if (kind === "mock") return "mock";
+  if (kind === "duffel" && df) return "duffel";
+  if (kind === "travelpayouts" && tp) return "travelpayouts";
+  if (!kind && tp) return "travelpayouts";
+  if (!kind && df) return "duffel";
   return "mock";
 }
 
