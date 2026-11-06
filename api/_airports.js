@@ -4,6 +4,7 @@
 // searching by city returns a group option covering all of them.
 
 // [code, city, country, lat, lon, hub, name]
+const WORLD = require("./_world.js");
 const ROWS = [
   ["LHR", "London", "UK", 51.47, -0.4543, 1, "Heathrow"],
   ["LGW", "London", "UK", 51.1537, -0.1821, 1, "Gatwick"],
@@ -94,7 +95,7 @@ const ROWS = [
   ["MLA", "Malta", "Malta", 35.8575, 14.4775, 0, "Luqa"],
   ["LCA", "Larnaca", "Cyprus", 34.8751, 33.6249, 0, "Larnaca"],
   ["KEF", "Reykjavik", "Iceland", 63.985, -22.6056, 0, "Keflavík"]
-];
+].concat(WORLD.WORLD_ROWS);
 
 // Italian / local spellings so "Milano", "Londra", "Monaco" … are found.
 const CITY_ALIASES = {
@@ -150,6 +151,10 @@ const COUNTRY_IT = {
   Lithuania: "Lituania", Croatia: "Croazia", Slovakia: "Slovacchia", Cyprus: "Cipro",
   Iceland: "Islanda"
 };
+Object.assign(CITY_ALIASES, WORLD.WORLD_CITY_ALIASES);
+Object.assign(COUNTRY_ALIASES, WORLD.WORLD_COUNTRY_ALIASES);
+Object.assign(CITY_IT, WORLD.WORLD_CITY_IT);
+Object.assign(COUNTRY_IT, WORLD.WORLD_COUNTRY_IT);
 const itCity = (c) => CITY_IT[c] || c;
 const itCountry = (c) => COUNTRY_IT[c] || c;
 
@@ -189,10 +194,11 @@ const fullName = (a) =>
 function cityScore(city, country, s) {
   const names = [city, CITY_IT[city], ...(CITY_ALIASES[city] || [])].filter(Boolean).map(norm);
   if (names.some((n) => n === s)) return 0;
-  if (names.some((n) => n.startsWith(s))) return 1;
-  if (names.some((n) => n.includes(s))) return 2;
   const countries = [country, COUNTRY_IT[country], ...(COUNTRY_ALIASES[country] || [])]
     .filter(Boolean).map(norm);
+  if (s.length >= 3 && countries.some((n) => n === s)) return 1; // whole country typed
+  if (names.some((n) => n.startsWith(s))) return 1;
+  if (names.some((n) => n.includes(s))) return 2;
   if (countries.some((n) => n.startsWith(s))) return 4;
   return null;
 }

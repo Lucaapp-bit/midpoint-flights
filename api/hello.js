@@ -1,5 +1,5 @@
-const { providerName } = require("./_providers.js");
+const { providerName, isTestMode } = require("./_providers.js");
 
 module.exports = (req, res) => {
-  res.status(200).json({ ok: true, message: "le funzioni funzionano", provider: providerName() });
+  res.status(200).json({ ok: true, message: "le funzioni funzionano", provider: providerName(), testMode: isTestMode() });
 };

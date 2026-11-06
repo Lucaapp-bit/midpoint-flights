@@ -1,7 +1,31 @@
-const { getAirport, primaryAirports, itCity, itCountry } = require("./_airports.js");
-const { priceLeg, providerName } = require("./_providers.js");
+const { getAirport, distanceKm, primaryAirports, itCity, itCountry } = require("./_airports.js");
+const { priceLeg, providerName, isTestMode } = require("./_providers.js");
 
 const MAX_ORIGINS = 6;
+const REAL_CANDIDATES = 12; // cities priced with a live provider (each costs real API calls)
+const REAL_DEADLINE_MS = 24000; // stay under the function limit and return what we have
+
+// Rank every city as a meeting point by geography alone: close to both
+// travelers, balanced between them, and well connected. Used to decide which
+// few cities are worth a (slow, metered) real fare lookup.
+function pickCandidates(destinations, codesA, codesB, n) {
+  const A = codesA.map(getAirport);
+  const B = codesB.map(getAirport);
+  const near = (d, list) => Math.min(...list.map((o) => distanceKm(o, d)));
+  const scored = destinations.map((d) => {
+    const da = near(getAirport(d), A);
+    const db = near(getAirport(d), B);
+    const ap = getAirport(d);
+    // average trip length, plus a penalty for lopsided trips, hub bonus
+    const score = (da + db) / 2 + Math.abs(da - db) * 0.6 - (ap.hub ? 400 : 0);
+    return { d, da, db, score };
+  });
+  return scored
+    .filter((x) => x.da > 250 && x.db > 250)
+    .sort((x, y) => x.score - y.score)
+    .slice(0, n)
+    .map((x) => x.d);
+}
 
 // Accepts "MXP" or ["MXP","LIN","BGY"]; returns a de-duplicated list of codes.
 function toCodes(v) {
@@ -64,18 +88,24 @@ module.exports = async (req, res) => {
 
   // One candidate destination per city (its primary airport), excluding the origin cities.
   const originCities = new Set([...citiesA, ...citiesB]);
-  const destinations = primaryAirports()
+  let destinations = primaryAirports()
     .filter((a) => !originCities.has(a.city))
     .map((a) => a.code);
 
   const provider = providerName();
-  const CONCURRENCY = provider === "duffel" ? 4 : 24;
+  const real = provider !== "mock";
+  const considered = destinations.length;
+  if (real) destinations = pickCandidates(destinations, codesA, codesB, REAL_CANDIDATES);
+  const CONCURRENCY = real ? 6 : 24;
+  const startedAt = Date.now();
+  let timedOut = false;
   const legOpts = { departDate, returnDate, nonStop };
   const results = [];
   let cursor = 0;
 
   const worker = async () => {
     while (cursor < destinations.length) {
+      if (real && Date.now() - startedAt > REAL_DEADLINE_MS) { timedOut = true; return; }
       const dest = destinations[cursor++];
       const [fa, fb] = await Promise.all([
         cheapestLeg(codesA, dest, legOpts),
@@ -120,6 +150,10 @@ module.exports = async (req, res) => {
   res.status(200).json({
     count: results.length,
     provider,
+    real: real && !isTestMode(),
+    searched: destinations.length,
+    considered,
+    partial: timedOut,
     results: results.slice(0, Number(limit))
   });
 };

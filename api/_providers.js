@@ -50,9 +50,14 @@ function providerName() {
   return "mock";
 }
 
+// Duffel test tokens return synthetic offers, not real fares.
+function isTestMode() {
+  return providerName() === "duffel" && /^duffel_test/.test(process.env.DUFFEL_TOKEN || "");
+}
+
 async function priceLeg(args) {
   if (providerName() === "duffel") return duffelPrice(args);
   return mockPrice(args);
 }
 
-module.exports = { providerName, priceLeg };
+module.exports = { providerName, isTestMode, priceLeg };

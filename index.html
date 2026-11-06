@@ -179,14 +179,14 @@ const API = {
     return d;
   },
   async provider() {
-    try { const r = await fetch("/api/hello"); return (await r.json()).provider || null; }
+    try { const r = await fetch("/api/hello"); const j = await r.json(); state.testMode = !!j.testMode; return j.provider || null; }
     catch { return null; }
   }
 };
 
 const EXAMPLES = [
-  ["Milano", "Londra"], ["Roma", "Berlino"], ["Istanbul", "Parigi"],
-  ["Madrid", "Atene"], ["Lisbona", "Varsavia"], ["Napoli", "Amsterdam"]
+  ["Milano", "Londra"], ["Istanbul", "Parigi"], ["Roma", "New York"],
+  ["Londra", "Dubai"], ["Madrid", "Buenos Aires"], ["Tokyo", "Sydney"]
 ];
 
 // ---------- helpers ----------
@@ -217,7 +217,7 @@ const state = {
   loading: false, error: "", data: null, sel: 0, provider: null, cities: [], mapMode: "fit"
 };
 const cityByCode = new Map();
-const isLive = () => !!state.provider && !state.provider.startsWith("mock");
+const isLive = () => !!state.provider && !state.provider.startsWith("mock") && !state.testMode;
 const sameCity = () => state.a && state.b && state.a.city === state.b.city;
 
 let mapSvg = null, capEl = null, listEl = null;
@@ -329,7 +329,9 @@ function fillPane(pane) {
   }
   const labels = { a: state.nameA.trim() || "Tu", b: state.nameB.trim() || "Lei / Lui" };
   pane.append(el("p", { class: "pane-h" },
-    `${state.data.count} città raggiungibili da entrambi. Ecco le ${res.length} più economiche.`,
+    (state.data.searched && state.data.searched < state.data.considered
+      ? `Ho confrontato le ${state.data.searched} città più adatte (su ${state.data.considered}) con tariffe vere${state.data.partial ? ", ma il tempo è finito prima di controllarle tutte" : ""}. Le ${res.length} più economiche:`
+      : `${state.data.count} città raggiungibili da entrambi. Ecco le ${res.length} più economiche.`),
     el("small", {}, `Prezzi per persona, ${state.roundTrip ? "andata e ritorno" : "sola andata"}.`)));
   const list = el("ol", { class: "list" });
   res.forEach((it, i) => list.append(row(it, i, labels)));
@@ -548,7 +550,7 @@ function paintCaption() {
 function paintProvider() {
   const b = document.getElementById("prov"), f = document.getElementById("foot-note");
   if (b) { b.hidden = !state.provider; b.classList.toggle("live", isLive()); b.textContent = isLive() ? "Tariffe reali" : "Prezzi di prova"; }
-  if (f) f.textContent = isLive() ? "Tariffe reali da Duffel." : "Prezzi di prova. Con Duffel collegato diventano tariffe reali.";
+  if (f) f.textContent = isLive() ? "Tariffe reali da Duffel." : (state.testMode ? "Duffel è in modalità test: i prezzi non sono reali." : "Prezzi di prova. Con un fornitore reale collegato diventano tariffe vere.");
 }
 
 // ---------- page ----------
