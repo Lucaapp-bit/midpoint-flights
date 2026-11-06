@@ -13,7 +13,7 @@ const ROWS = [
   ["CDG", "Paris", "France", 49.0097, 2.5479, 1, "Charles de Gaulle"],
   ["ORY", "Paris", "France", 48.7233, 2.3794, 1, "Orly"],
   ["AMS", "Amsterdam", "Netherlands", 52.3105, 4.7683, 1, "Schiphol"],
-  ["FRA", "Frankfurt", "Germany", 50.0379, 8.5622, 1, "Frankfurt"],
+  ["FRA", "Frankfurt", "Germany", 50.0379, 8.5622, 1, "Rhein-Main"],
   ["HHN", "Frankfurt", "Germany", 49.9487, 7.2639, 0, "Hahn"],
   ["MAD", "Madrid", "Spain", 40.4936, -3.5668, 1, "Barajas"],
   ["BCN", "Barcelona", "Spain", 41.2974, 2.0833, 1, "El Prat"],
@@ -127,6 +127,32 @@ const COUNTRY_ALIASES = {
   Serbia: ["serbia"], Albania: ["albania"], Estonia: ["estonia"], Austria: ["austria"]
 };
 
+// Italian display names (the English name stays the internal grouping key).
+const CITY_IT = {
+  London: "Londra", Paris: "Parigi", Milan: "Milano", Rome: "Roma", Venice: "Venezia",
+  Naples: "Napoli", Florence: "Firenze", Turin: "Torino", Munich: "Monaco di Baviera",
+  Prague: "Praga", Athens: "Atene", Lisbon: "Lisbona", Berlin: "Berlino",
+  Copenhagen: "Copenaghen", Warsaw: "Varsavia", Krakow: "Cracovia", Brussels: "Bruxelles",
+  Geneva: "Ginevra", Zurich: "Zurigo", Seville: "Siviglia", "Palma de Mallorca": "Palma di Maiorca",
+  Nice: "Nizza", Lyon: "Lione", Hamburg: "Amburgo", Cologne: "Colonia", Bucharest: "Bucarest",
+  Marseille: "Marsiglia", Belgrade: "Belgrado", Edinburgh: "Edimburgo", Dublin: "Dublino",
+  Stockholm: "Stoccolma", Frankfurt: "Francoforte", Gdansk: "Danzica", Zagreb: "Zagabria",
+  Thessaloniki: "Salonicco", Ljubljana: "Lubiana", Izmir: "Smirne", Gothenburg: "Göteborg",
+  Dusseldorf: "Düsseldorf", Barcelona: "Barcellona", Split: "Spalato", Reykjavik: "Reykjavík",
+  Toulouse: "Tolosa"
+};
+const COUNTRY_IT = {
+  UK: "Regno Unito", France: "Francia", Netherlands: "Paesi Bassi", Germany: "Germania",
+  Spain: "Spagna", Italy: "Italia", Switzerland: "Svizzera", Portugal: "Portogallo",
+  Ireland: "Irlanda", Denmark: "Danimarca", Sweden: "Svezia", Norway: "Norvegia",
+  Finland: "Finlandia", Czechia: "Repubblica Ceca", Hungary: "Ungheria", Poland: "Polonia",
+  Greece: "Grecia", Turkey: "Turchia", Belgium: "Belgio", Latvia: "Lettonia",
+  Lithuania: "Lituania", Croatia: "Croazia", Slovakia: "Slovacchia", Cyprus: "Cipro",
+  Iceland: "Islanda"
+};
+const itCity = (c) => CITY_IT[c] || c;
+const itCountry = (c) => COUNTRY_IT[c] || c;
+
 const AIRPORTS = ROWS.map(([code, city, country, lat, lon, hub, name]) => ({
   code, city, country, lat, lon, hub: !!hub, name
 }));
@@ -156,15 +182,17 @@ function distanceKm(a, b) {
 const norm = (s) =>
   String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
-// "Milan Malpensa", but just "Istanbul Airport" (no repeated city name)
-const fullName = (a) => (norm(a.name).startsWith(norm(a.city)) ? a.name : `${a.city} ${a.name}`);
+// "Milano Malpensa", but just "Istanbul Airport" (no repeated city name)
+const fullName = (a) =>
+  norm(a.name).startsWith(norm(itCity(a.city))) ? a.name : `${itCity(a.city)} ${a.name}`;
 
 function cityScore(city, country, s) {
-  const names = [city, ...(CITY_ALIASES[city] || [])].map(norm);
+  const names = [city, CITY_IT[city], ...(CITY_ALIASES[city] || [])].filter(Boolean).map(norm);
   if (names.some((n) => n === s)) return 0;
   if (names.some((n) => n.startsWith(s))) return 1;
   if (names.some((n) => n.includes(s))) return 2;
-  const countries = [country, ...(COUNTRY_ALIASES[country] || [])].map(norm);
+  const countries = [country, COUNTRY_IT[country], ...(COUNTRY_ALIASES[country] || [])]
+    .filter(Boolean).map(norm);
   if (countries.some((n) => n.startsWith(s))) return 4;
   return null;
 }
@@ -177,6 +205,7 @@ function airportMatches(a, s) {
 
 // Returns options: a "city" group (all airports) first when the city has
 // several airports, followed by the individual airports.
+// `text` is what goes into the input field once picked (kept short).
 function searchAirports(q, limit = 12) {
   const s = norm(q);
   if (!s) return [];
@@ -185,51 +214,43 @@ function searchAirports(q, limit = 12) {
   for (const [city, list] of byCity) {
     const country = list[0].country;
     let score = cityScore(city, country, s);
+    const cityMatch = score !== null;
     const matched = list.filter((a) => airportMatches(a, s));
     if (score === null && matched.length) score = 3;
     if (score === null) continue;
     if (list.some((a) => a.code.toLowerCase() === s)) score = 0; // exact IATA code wins
-    hits.push({ city, country, list, score, order: order++, cityMatch: cityScore(city, country, s) !== null, matched });
+    hits.push({ city, country, list, score, order: order++, cityMatch, matched });
   }
   hits.sort((x, y) => x.score - y.score || x.order - y.order);
+  // A country-only match ("roma" -> Romania) is noise when a city matches.
+  if (hits.length && hits[0].score < 4) {
+    for (let i = hits.length - 1; i >= 0 && hits[i].score === 4; i--) hits.pop();
+  }
 
   const out = [];
   for (const h of hits) {
     const codes = h.list.map((a) => a.code);
+    const cityIt = itCity(h.city);
+    const countryIt = itCountry(h.country);
     const airports = h.cityMatch ? h.list : h.matched;
     if (h.list.length > 1) {
-      if (h.cityMatch) out.push({
-        type: "city",
-        city: h.city,
-        country: h.country,
-        codes,
-        label: `${h.city} — tutti gli aeroporti`,
-        sub: `${h.country} · ${codes.join(" · ")}`,
-        text: `${h.city} (${codes.join(", ")})`
-      });
+      if (h.cityMatch) {
+        out.push({
+          type: "city", city: cityIt, country: countryIt, codes,
+          label: cityIt, sub: `tutti gli aeroporti: ${codes.join(", ")}`, text: cityIt
+        });
+      }
       for (const a of airports) {
         out.push({
-          type: "airport",
-          code: a.code,
-          city: a.city,
-          country: a.country,
-          codes: [a.code],
-          label: fullName(a),
-          sub: `${a.country} · ${a.code}`,
-          text: `${fullName(a)} (${a.code})`
+          type: "airport", code: a.code, city: cityIt, country: countryIt, codes: [a.code],
+          label: fullName(a), sub: `${countryIt}, ${a.code}`, text: fullName(a)
         });
       }
     } else {
       const a = h.list[0];
       out.push({
-        type: "airport",
-        code: a.code,
-        city: a.city,
-        country: a.country,
-        codes: [a.code],
-        label: a.city,
-        sub: `${a.country} · ${a.code}`,
-        text: `${a.city} (${a.code})`
+        type: "airport", code: a.code, city: cityIt, country: countryIt, codes: [a.code],
+        label: cityIt, sub: `${countryIt}, ${a.code}`, text: cityIt
       });
     }
     if (out.length >= limit) break;
@@ -237,4 +258,17 @@ function searchAirports(q, limit = 12) {
   return out.slice(0, limit);
 }
 
-module.exports = { AIRPORTS, getAirport, distanceKm, searchAirports, primaryAirports };
+// One entry per city (primary airport coordinates) for the map.
+function listCities() {
+  return [...byCity.values()].map((list) => {
+    const p = list[0];
+    return {
+      city: itCity(p.city), country: itCountry(p.country), code: p.code,
+      codes: list.map((a) => a.code), lat: p.lat, lon: p.lon
+    };
+  });
+}
+
+module.exports = {
+  AIRPORTS, getAirport, distanceKm, searchAirports, primaryAirports, listCities, itCity, itCountry
+};

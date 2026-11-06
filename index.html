@@ -2,138 +2,147 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MidPoint · dove incontrarci</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#E8EDED" />
+<title>MidPoint, dove ci vediamo?</title>
+<meta name="description" content="Siete in due città diverse? MidPoint trova la terza città dove incontrarvi spendendo meno in totale." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='11' cy='16' r='9' fill='%23D9650A'/%3E%3Ccircle cx='21' cy='16' r='9' fill='%230B8A80' fill-opacity='.85'/%3E%3C/svg%3E" />
+<link rel="preload" href="/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin />
 <style>
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:200 800;font-display:swap;src:url(/fonts/bricolage-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:200 800;font-display:swap;src:url(/fonts/bricolage-latin.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
 :root{
-  --ink:#0a0e1a;--ink-2:#111726;--panel:#161d30;--panel-2:#1c2540;--line:#263252;
-  --mist:#8a97b8;--text:#eaf0ff;--text-dim:#b3bede;
-  --a:#ffb347;--a-deep:#f0932b;--b:#4fd6e0;--b-deep:#2bb8d4;--meet:#c9a6ff;
-  --ok:#6ee7a8;--warn:#ff8a8a;--r:14px;--shadow:0 20px 60px -20px rgba(0,0,0,.7);
+  --paper:#E8EDED; --surface:#F5F8F7; --sea:#D8E3E5;
+  --ink:#12263A; --ink-2:#445669; --line:rgba(18,38,58,.16); --line-2:rgba(18,38,58,.42);
+  --a:#D9650A; --b:#0B8A80; --err:#A3301F;
 }
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(900px 500px at 12% -5%,rgba(240,147,43,.14),transparent 60%),radial-gradient(900px 500px at 90% 8%,rgba(43,184,212,.14),transparent 60%),var(--ink);color:var(--text);font-family:"Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-.page{max-width:1120px;margin:0 auto;padding:28px 22px 80px;position:relative;overflow:hidden}
-.orbit{position:absolute;border-radius:50%;filter:blur(2px);opacity:.35;pointer-events:none;border:1px solid transparent}
-.orbit-a{width:520px;height:520px;top:-160px;left:-180px;border-color:rgba(255,179,71,.25)}
-.orbit-b{width:600px;height:600px;top:-220px;right:-220px;border-color:rgba(79,214,224,.22)}
-@media(prefers-reduced-motion:no-preference){.orbit-a{animation:drift 22s ease-in-out infinite}.orbit-b{animation:drift 26s ease-in-out infinite reverse}}
-@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,20px)}}
-.masthead{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
-.brand{display:flex;align-items:center;gap:12px;font-family:"Fraunces",serif;font-weight:900;font-size:22px;letter-spacing:-.02em}
-.brand-mark{position:relative;width:26px;height:26px;display:inline-block}
-.brand-mark i{position:absolute;top:50%;width:15px;height:15px;border-radius:50%;transform:translateY(-50%);mix-blend-mode:screen}
-.brand-mark .mark-a{left:0;background:var(--a)}.brand-mark .mark-b{right:0;background:var(--b)}
-.provider{font-family:"JetBrains Mono",monospace;font-size:11px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mist);text-transform:uppercase;letter-spacing:.08em}
-.provider-amadeus{color:var(--ok);border-color:rgba(110,231,168,.4)}
-.hero{margin:56px 0 34px;position:relative;z-index:2}
-.hero h1{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(38px,7vw,76px);line-height:.98;letter-spacing:-.03em;margin:0 0 20px}
-.hero h1 em{font-style:italic;background:linear-gradient(100deg,var(--a),var(--meet) 50%,var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero-sub{max-width:560px;font-size:17px;line-height:1.55;color:var(--text-dim);margin:0}
-.hero-sub strong{color:var(--text)}
-.console{background:linear-gradient(180deg,var(--panel),var(--ink-2));border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:var(--shadow);position:relative;z-index:2}
-.cities{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:14px}
-.converge{display:flex;flex-direction:column;align-items:center;padding-bottom:14px;gap:4px}
-.conv-line{width:2px;height:16px;background:linear-gradient(var(--a),var(--meet))}
-.converge .conv-line:last-child{background:linear-gradient(var(--meet),var(--b))}
-.conv-node{width:12px;height:12px;border-radius:50%;background:var(--meet);box-shadow:0 0 0 4px rgba(201,166,255,.18)}
-.city-input{position:relative}
-.city-input label{display:flex;align-items:center;gap:7px;font-size:12.5px;letter-spacing:.02em;color:var(--mist);margin-bottom:8px}
-.city-input .dot{width:9px;height:9px;border-radius:50%}
-.traveler-a .dot{background:var(--a)}.traveler-b .dot{background:var(--b)}
-.city-input input{width:100%;background:var(--ink);border:1.5px solid var(--line);border-radius:var(--r);padding:15px 16px;color:var(--text);font-size:16px;font-family:inherit;transition:border-color .15s,box-shadow .15s}
-.traveler-a input:focus{outline:none;border-color:var(--a);box-shadow:0 0 0 3px rgba(255,179,71,.16)}
-.traveler-b input:focus{outline:none;border-color:var(--b);box-shadow:0 0 0 3px rgba(79,214,224,.16)}
-.options{list-style:none;margin:6px 0 0;padding:6px;position:absolute;z-index:20;left:0;right:0;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);max-height:260px;overflow:auto}
-.options li{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:9px;cursor:pointer}
-.options li.active{background:rgba(255,255,255,.06)}
-.opt-city{font-weight:500}.opt-meta{font-size:12px;color:var(--mist)}
-.opt-meta code,.options code{font-family:"JetBrains Mono",monospace}
-.names{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
-.names input{background:transparent;border:none;border-bottom:1.5px solid var(--line);padding:6px 2px;color:var(--text);font-family:inherit;font-size:14px}
-.names input:focus{outline:none}
-.name-a{border-bottom-color:rgba(255,179,71,.5)!important}
-.name-b{border-bottom-color:rgba(79,214,224,.5)!important;text-align:right}
-.controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:20px}
-.ctl{display:flex;flex-direction:column;gap:7px}
-.ctl span{font-size:12.5px;color:var(--mist)}
-.ctl input{background:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:12px 13px;color:var(--text);font-family:inherit;font-size:15px;color-scheme:dark}
-.ctl input:focus{outline:none;border-color:var(--meet)}
-.ctl input:disabled{opacity:.4}
-.toggles{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-.toggle{background:var(--ink);border:1.5px solid var(--line);color:var(--text-dim);padding:10px 16px;border-radius:999px;font-family:inherit;font-size:13.5px;cursor:pointer;transition:all .15s}
-.toggle.on{border-color:var(--meet);color:var(--text);background:rgba(201,166,255,.1)}
-.go{width:100%;margin-top:22px;padding:17px;border:none;border-radius:var(--r);font-family:"Fraunces",serif;font-weight:600;font-size:18px;letter-spacing:-.01em;color:var(--ink);background:linear-gradient(100deg,var(--a),var(--meet) 52%,var(--b));cursor:pointer;transition:transform .12s,filter .15s}
-.go:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.06)}
-.go:disabled{opacity:.45;cursor:not-allowed}
-.hint{font-size:13px;margin:10px 0 0}.hint.warn{color:var(--warn)}
-.results{margin-top:40px;position:relative;z-index:2}
-.results-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;color:var(--text-dim);font-size:14px}
-.results-meta strong{color:var(--text);font-size:16px}
-.sort-note{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--mist)}
-.cards{display:grid;gap:14px}
-.result{display:grid;grid-template-columns:54px 1fr;gap:4px;background:linear-gradient(180deg,var(--panel),var(--ink-2));border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:border-color .15s,transform .15s}
-.result:hover{transform:translateY(-2px);border-color:#34436e}
-.result.is-best{border:1.5px solid transparent;background:linear-gradient(var(--panel),var(--ink-2)) padding-box,linear-gradient(120deg,var(--a),var(--meet),var(--b)) border-box}
-.result-rank{display:flex;align-items:flex-start;justify-content:center;padding-top:22px;font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--mist);background:rgba(0,0,0,.18)}
-.result.is-best .result-rank{color:var(--meet);font-size:20px}
-.result-main{padding:20px 22px}
-.result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
-.result-head h3{font-family:"Fraunces",serif;font-weight:600;font-size:26px;letter-spacing:-.02em;margin:0}
-.result-country{margin:2px 0 0;font-size:13px;color:var(--mist)}
-.result-country code{font-family:"JetBrains Mono",monospace}
-.result-total{text-align:right;display:flex;flex-direction:column}
-.total-num{font-family:"Fraunces",serif;font-weight:900;font-size:30px;letter-spacing:-.02em}
-.total-lbl{font-size:11.5px;color:var(--mist);margin-top:2px}
-.best-tag{align-self:flex-end;margin-top:8px;font-size:11px;font-family:"JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);background:var(--meet);padding:3px 9px;border-radius:999px}
-.split{display:flex;height:8px;border-radius:999px;overflow:hidden;margin:18px 0 16px;background:var(--ink)}
-.split-a{background:linear-gradient(90deg,var(--a-deep),var(--a))}
-.split-b{background:linear-gradient(90deg,var(--b),var(--b-deep))}
-.legs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:560px){.legs{grid-template-columns:1fr}}
-.leg{display:flex;gap:10px}
-.leg-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:none}
-.leg-a .leg-dot{background:var(--a)}.leg-b .leg-dot{background:var(--b)}
-.leg-body{flex:1}
-.leg-top{display:flex;justify-content:space-between;align-items:baseline}
-.leg-name{font-size:13.5px;color:var(--text-dim)}
-.leg-price{font-family:"JetBrains Mono",monospace;font-weight:500;font-size:16px}
-.leg-route{display:flex;align-items:center;gap:7px;margin-top:3px;font-size:12.5px;color:var(--mist)}
-.leg-route code{font-family:"JetBrains Mono",monospace;color:var(--text-dim)}
-.leg-route .arrow{color:var(--line)}.leg-flags{margin-left:auto;font-size:11.5px}
-.result-foot{display:flex;gap:10px;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);flex-wrap:wrap}
-.fair{font-family:"JetBrains Mono",monospace;font-size:12px;padding:4px 10px;border-radius:999px}
-.fair-hi{color:var(--ok);background:rgba(110,231,168,.12)}
-.fair-mid{color:var(--a);background:rgba(255,179,71,.12)}
-.fair-lo{color:var(--warn);background:rgba(255,138,138,.12)}
-.chip{font-size:12px;color:var(--text-dim);border:1px solid var(--line);padding:4px 10px;border-radius:999px}
-.chip.subtle{color:var(--mist)}
-.skeletons{display:grid;gap:14px}
-.skeleton{height:150px;border-radius:18px;background:linear-gradient(100deg,var(--panel) 30%,var(--panel-2) 50%,var(--panel) 70%);background-size:200% 100%;animation:shimmer 1.3s linear infinite}
-@keyframes shimmer{to{background-position:-200% 0}}
-.empty,.error{padding:22px;border-radius:var(--r);border:1px dashed var(--line);color:var(--text-dim);text-align:center}
-.error{color:var(--warn);border-color:rgba(255,138,138,.4)}
-.site-foot{display:flex;justify-content:space-between;margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--mist);font-size:12.5px;position:relative;z-index:2}
-@media(max-width:680px){.cities{grid-template-columns:1fr}.converge{flex-direction:row;padding:4px 0}.converge .conv-line{width:16px;height:2px}.controls{grid-template-columns:1fr}.result-head{flex-direction:column}.result-total{text-align:left}.best-tag{align-self:flex-start}}
-.options li.group{background:rgba(201,166,255,.08);border-bottom:1px solid var(--line);margin-bottom:4px}
-.options li.group .opt-city{color:var(--meet)}
-.examples{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
-.examples-lbl{font-size:12.5px;color:var(--mist)}
-.example{background:transparent;border:1px dashed var(--line);color:var(--text-dim);padding:7px 13px;border-radius:999px;font-family:inherit;font-size:12.5px;cursor:pointer;transition:all .15s}
-.example:hover{border-color:var(--meet);color:var(--text)}
-.hint[hidden],.provider[hidden]{display:none}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.5 "Bricolage Grotesque",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:3px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0 0}
+.brand-line{display:flex;align-items:baseline;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none;font-weight:700;font-size:1.2rem;letter-spacing:-.01em}
+.mark{position:relative;width:30px;height:20px;display:inline-block}
+.mark i{position:absolute;top:0;width:20px;height:20px;border-radius:50%;mix-blend-mode:multiply}
+.mark .ma{left:0;background:var(--a)}
+.mark .mb{right:0;background:var(--b)}
+.tag{color:var(--ink-2);font-size:.95rem}
+.mode{display:inline-flex;align-items:center;gap:8px;font-size:.9rem;color:var(--ink-2)}
+.mode::before{content:"";width:9px;height:9px;border-radius:50%;border:2px solid var(--ink-2)}
+.mode.live::before{background:var(--b);border-color:var(--b)}
+.mode[hidden]{display:none}
+
+/* ---------- the sentence (form) ---------- */
+.ask{padding:clamp(36px,8vw,84px) 0 8px}
+.ask-title{margin:0 0 clamp(20px,3vw,32px);font-weight:650;font-size:clamp(2rem,5.6vw,4.4rem);line-height:1.12;letter-spacing:-.028em}
+.fld{position:relative;display:inline-block;max-width:100%}
+.fld input{font:inherit;letter-spacing:inherit;color:inherit;background:transparent;border:0;border-bottom:.075em solid var(--c);border-radius:0;padding:0 .06em;margin:0;min-width:2.6em;max-width:100%}
+.fld input::placeholder{color:rgba(18,38,58,.3);opacity:1}
+.fld input:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2px;background:rgba(255,255,255,.5)}
+.fld.a{--c:var(--a)}
+.fld.b{--c:var(--b)}
+
+.options{list-style:none;margin:0;padding:6px;position:absolute;left:0;top:calc(100% + 12px);z-index:30;min-width:min(340px,calc(100vw - 48px));max-height:340px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 18px 40px -20px rgba(18,38,58,.5);font-size:1rem;font-weight:400;letter-spacing:0;line-height:1.35;text-align:left}
+.options li{display:block;padding:9px 12px;border-radius:7px;cursor:pointer}
+.options li.active{background:rgba(18,38,58,.08)}
+.options li.group{border-bottom:1px solid var(--line);border-radius:7px 7px 0 0;margin-bottom:4px}
+.opt-city{display:block;font-weight:550}
+.opt-meta{display:block;font-size:.84rem;color:var(--ink-2)}
+
+.when .ln{display:block}
+.when{margin:0 0 18px;max-width:56rem;font-size:clamp(1.1rem,2vw,1.45rem);line-height:1.85;font-weight:450;letter-spacing:-.005em}
+.when input[type=date],.when input[type=number]{background:transparent;border:0;border-bottom:2px solid var(--line-2);border-radius:0;padding:0 2px;color-scheme:light;font-weight:600}
+.when input[type=number]{width:7.6em;-moz-appearance:textfield;appearance:textfield}
+.when input[type=number]::-webkit-inner-spin-button,.when input[type=number]::-webkit-outer-spin-button{display:none}
+.when input:disabled{opacity:.4}
+.t{background:none;border:0;padding:0;cursor:pointer;font-weight:600;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.22em;text-decoration-color:var(--ink)}
+.t:hover{text-decoration-color:var(--a)}
+
+.names{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 26px;color:var(--ink-2);font-size:.95rem}
+.names label{display:inline-flex;align-items:center;gap:8px}
+.sw{display:inline-block;width:18px;height:4px;border-radius:2px}
+.sw.a{background:var(--a)}
+.sw.b{background:var(--b)}
+.names input{background:transparent;border:0;border-bottom:1px solid var(--line-2);border-radius:0;padding:2px 0;width:8.5em;color:var(--ink)}
+
+.go{border:0;border-radius:8px;background:var(--ink);color:var(--paper);font-weight:650;font-size:1.1rem;padding:14px 26px;cursor:pointer}
+.go:hover:not(:disabled){background:#0A1B2B}
+.go:disabled{opacity:.38;cursor:not-allowed}
+.warn{margin:12px 0 0;color:var(--err);font-size:.95rem}
+.warn[hidden]{display:none}
+.try{margin:20px 0 0;color:var(--ink-2);font-size:.95rem}
+.try .t{color:var(--ink);font-weight:500}
+
+/* ---------- map + results ---------- */
+.board{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(24px,4vw,56px);margin-top:clamp(40px,6vw,72px);padding-bottom:72px;align-items:start;scroll-margin-top:16px}
+.pane{grid-column:1;grid-row:1}
+.map-wrap{grid-column:2;grid-row:1;position:sticky;top:20px}
+.map{background:var(--sea);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.map svg{display:block;width:100%;height:auto;aspect-ratio:1000/825}
+.map text{font-family:inherit;paint-order:stroke;stroke:var(--sea);stroke-linejoin:round}
+.thread{fill:none;stroke-linecap:round;stroke-dasharray:1}
+.thread.draw{animation:draw .8s cubic-bezier(.3,.7,.2,1) both}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.cap{margin:12px 2px 0;color:var(--ink-2);font-size:.95rem;min-height:3em}
+.cap strong{color:var(--ink);font-weight:650}
+
+.pane-h{margin:0 0 14px;font-size:1.05rem;font-weight:550;line-height:1.4;max-width:34rem}
+.pane-h small{display:block;margin-top:2px;color:var(--ink-2);font-weight:400;font-size:.9rem}
+.list{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--line)}
+.row{display:block;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--line);padding:18px 16px 18px 18px;cursor:pointer}
+.row:hover{background:rgba(255,255,255,.4)}
+.row[aria-pressed="true"]{background:var(--surface);box-shadow:inset 4px 0 0 var(--ink)}
+.row-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.row-city{font-size:1.5rem;font-weight:650;letter-spacing:-.015em;line-height:1.15}
+.row-country{display:block;font-size:.88rem;color:var(--ink-2)}
+.best{display:inline-block;margin-left:10px;vertical-align:middle;background:var(--ink);color:var(--paper);font-size:.78rem;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:0}
+.row-price{text-align:right;flex:none}
+.row-total{display:block;font-size:1.6rem;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.15}
+.row-sub{display:block;font-size:.8rem;color:var(--ink-2)}
+.leg{display:grid;grid-template-columns:18px 1fr auto;column-gap:10px;align-items:baseline;margin-top:12px;font-size:.95rem}
+.leg-line{height:4px;border-radius:2px;align-self:center}
+.leg.a .leg-line{background:var(--a)}
+.leg.b .leg-line{background:var(--b)}
+.leg-name{font-weight:550}
+.leg-price{font-variant-numeric:tabular-nums;font-weight:600}
+.leg-info{grid-column:2/-1;color:var(--ink-2);font-size:.85rem}
+.split{display:flex;height:4px;border-radius:2px;overflow:hidden;margin:14px 0 6px;background:var(--line)}
+.split i{display:block;height:100%}
+.split .sa{background:var(--a)}
+.split .sb{background:var(--b)}
+.gap{display:block;font-size:.82rem;color:var(--ink-2)}
+
+.hint-box{max-width:30rem;color:var(--ink-2)}
+.hint-box p{margin:0 0 .8em}
+.err{margin:0;border-left:3px solid var(--err);padding:4px 0 4px 14px;color:var(--err);max-width:30rem}
+.sk{position:relative;height:112px;border-top:1px solid var(--line)}
+.sk::before{content:"";position:absolute;left:18px;top:22px;width:46%;height:22px;background:rgba(18,38,58,.08);border-radius:4px;box-shadow:0 38px 0 -4px rgba(18,38,58,.06),0 62px 0 -4px rgba(18,38,58,.06)}
+@media(prefers-reduced-motion:no-preference){.sk::before{animation:pulse 1.2s ease-in-out infinite}}
+@keyframes pulse{50%{opacity:.5}}
+@media(prefers-reduced-motion:reduce){.thread.draw{animation:none}}
+
+.foot{border-top:1px solid var(--line);padding:22px 0 44px;display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;color:var(--ink-2);font-size:.88rem}
+
+@media(max-width:900px){
+  .board{grid-template-columns:1fr}
+  .map-wrap{grid-column:1;grid-row:1;position:static}
+  .pane{grid-column:1;grid-row:2}
+}
+@media(max-width:720px){.tag{display:none}}
+@media(max-width:480px){.wrap{padding:0 18px}.row{padding-left:14px;padding-right:12px}}
 </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="module">
-// ============================================================
-// MidPoint — vanilla JS (no build step). Calls the Vercel /api/* functions.
-// ============================================================
+// MidPoint: vanilla JS, no build step. Talks to the /api/* functions on Vercel.
 
 const API = {
   async search(q) {
@@ -143,14 +152,24 @@ const API = {
       return await r.json();
     } catch { return []; }
   },
+  async cities() {
+    try {
+      const r = await fetch("/api/airports?all=1");
+      if (!r.ok) throw new Error();
+      return await r.json();
+    } catch { return []; }
+  },
   async meeting(payload) {
-    const r = await fetch("/api/meeting-points", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    let r;
+    try {
+      r = await fetch("/api/meeting-points", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch { throw new Error("Non riesco a contattare il server. Riprova tra un attimo."); }
     const d = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(d.error || "Errore nel calcolo");
+    if (!r.ok) throw new Error(d.error || "Qualcosa non ha funzionato. Riprova.");
     return d;
   },
   async provider() {
@@ -159,210 +178,394 @@ const API = {
   }
 };
 
-// Percorsi di esempio (ognuno è una ricerca di testo: le città con più aeroporti li includono tutti)
 const EXAMPLES = [
   ["Milano", "Londra"], ["Roma", "Berlino"], ["Istanbul", "Parigi"],
   ["Madrid", "Atene"], ["Lisbona", "Varsavia"], ["Napoli", "Amsterdam"]
 ];
 
-// ---------- tiny DOM helpers ----------
-const fmt=(n,c="EUR")=>new Intl.NumberFormat("it-IT",{style:"currency",currency:c,maximumFractionDigits:0}).format(n);
-const mins=m=>m==null?"—":`${Math.floor(m/60)}h ${String(m%60).padStart(2,"0")}m`;
-const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(k==="html")e.innerHTML=v;else e.setAttribute(k,v)}for(const kid of kids.flat()){if(kid==null)continue;e.append(kid.nodeType?kid:document.createTextNode(kid))}return e};
-const todayISO=()=>new Date().toISOString().slice(0,10);
-const plusDays=(base,n)=>{const d=new Date(base);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+// ---------- helpers ----------
+const NS = "http://www.w3.org/2000/svg";
+const fmt = (n, c = "EUR") => new Intl.NumberFormat("it-IT", { style: "currency", currency: c, maximumFractionDigits: 0 }).format(n);
+const mins = m => m == null ? "durata n.d." : `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`;
+const el = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) { if (kid == null) continue; e.append(kid.nodeType ? kid : document.createTextNode(kid)); }
+  return e;
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const plusDays = (base, n) => { const d = new Date(base); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ---------- state ----------
-// state.a / state.b = selected option {codes:[...], text, ...}; state.textA/textB = what is typed in the field.
-const state={a:null,b:null,textA:"",textB:"",nameA:"Tu",nameB:"Lei / Lui",depart:plusDays(todayISO(),30),ret:plusDays(todayISO(),33),roundTrip:true,nonStop:false,budget:"",loading:false,error:"",data:null,provider:null};
-const isLive=()=>!!state.provider&&!state.provider.startsWith("mock");
-const sameCity=()=>state.a&&state.b&&state.a.city===state.b.city;
+// state.a / state.b hold the chosen option ({city, codes, ...}); textA/textB hold what is typed.
+const state = {
+  a: null, b: null, textA: "", textB: "", nameA: "Tu", nameB: "Lei / Lui",
+  depart: plusDays(todayISO(), 30), ret: plusDays(todayISO(), 33),
+  roundTrip: true, nonStop: false, budget: "",
+  loading: false, error: "", data: null, sel: 0, provider: null, cities: []
+};
+const cityByCode = new Map();
+const isLive = () => !!state.provider && !state.provider.startsWith("mock");
+const sameCity = () => state.a && state.b && state.a.city === state.b.city;
 
-// ---------- autocomplete input ----------
-// side: "a" | "b". The selection lives in state, so re-rendering the page never loses it.
-function cityInput(side,label,onChange){
-  const textKey=side==="a"?"textA":"textB";
-  const wrap=el("div",{class:`city-input traveler-${side}`});
-  const lab=el("label",{},el("span",{class:"dot"}),label);
-  const input=el("input",{type:"text",placeholder:"Città o aeroporto…",autocomplete:"off","aria-label":label,value:state[textKey]});
-  const list=el("ul",{class:"options",role:"listbox"});list.style.display="none";
-  let opts=[],active=0,timer,seq=0;
+let mapSvg = null, capEl = null, listEl = null;
+const closers = new Set();
+document.addEventListener("mousedown", e => closers.forEach(fn => fn(e)));
 
-  const paintActive=()=>[...list.children].forEach((li,i)=>li.classList.toggle("active",i===active));
-  const close=()=>{opts=[];list.innerHTML="";list.style.display="none"};
-  const open=()=>{
-    list.innerHTML="";
-    if(!opts.length){list.style.display="none";return}
-    list.style.display="block";
-    opts.forEach((o,i)=>{
-      const li=el("li",{role:"option",class:`${o.type==="city"?"group":""} ${i===active?"active":""}`,
-        onmousedown:e=>{e.preventDefault();pick(o)},
-        onmouseenter:()=>{active=i;paintActive()}},
-        el("span",{class:"opt-city"},o.label),
-        el("span",{class:"opt-meta"},o.sub));
-      list.append(li);
-    });
+// width of an inline field follows its text
+const fit = i => { const n = Math.max(4, (i.value || i.placeholder || "").length); i.style.width = (n * 0.5 + 0.45) + "em"; };
+
+// ---------- city field with autocomplete ----------
+function cityInput(side, placeholder, label, onChange) {
+  const textKey = side === "a" ? "textA" : "textB";
+  const wrap = el("span", { class: `fld ${side}` });
+  const input = el("input", {
+    type: "text", placeholder, autocomplete: "off", autocapitalize: "words", spellcheck: "false",
+    "aria-label": label, role: "combobox", "aria-expanded": "false", "aria-autocomplete": "list"
+  });
+  input.value = state[textKey];
+  fit(input);
+  const list = el("ul", { class: "options", role: "listbox" });
+  list.style.display = "none";
+  let opts = [], active = 0, timer, seq = 0;
+
+  const paintActive = () => [...list.children].forEach((li, i) => li.classList.toggle("active", i === active));
+  const close = () => { opts = []; list.innerHTML = ""; list.style.display = "none"; input.setAttribute("aria-expanded", "false"); };
+  const open = () => {
+    list.innerHTML = "";
+    if (!opts.length) { close(); return; }
+    opts.forEach((o, i) => list.append(el("li", {
+      role: "option", class: `${o.type === "city" ? "group" : ""}${i === active ? " active" : ""}`,
+      onmousedown: e => { e.preventDefault(); pick(o); },
+      onmouseenter: () => { active = i; paintActive(); }
+    }, el("span", { class: "opt-city" }, o.label), el("span", { class: "opt-meta" }, o.sub))));
+    list.style.display = "block"; list.style.left = "0";
+    input.setAttribute("aria-expanded", "true");
+    const over = list.getBoundingClientRect().right - (window.innerWidth - 12);
+    if (over > 0) list.style.left = -over + "px";
   };
-  const pick=o=>{
-    state[side]=o;state[textKey]=o.text;input.value=o.text;close();onChange();
-  };
-  const search=async q=>{const my=++seq;const r=await API.search(q);return my===seq?r:null};
+  const pick = o => { state[side] = o; state[textKey] = o.text; input.value = o.text; fit(input); close(); onChange(); };
+  const search = async q => { const my = ++seq; const r = await API.search(q); return my === seq ? r : null; };
 
-  input.addEventListener("input",()=>{
-    state[side]=null;state[textKey]=input.value;onChange();
+  input.addEventListener("input", () => {
+    state[side] = null; state[textKey] = input.value; fit(input); onChange();
     clearTimeout(timer);
-    const q=input.value.trim();
-    if(q.length<2){seq++;close();return}
-    timer=setTimeout(async()=>{const r=await search(q);if(r){opts=r;active=0;open()}},150);
+    const q = input.value.trim();
+    if (q.length < 2) { seq++; close(); return; }
+    timer = setTimeout(async () => { const r = await search(q); if (r) { opts = r; active = 0; open(); } }, 150);
   });
-  input.addEventListener("keydown",e=>{
-    if(!opts.length)return;
-    if(e.key==="ArrowDown"){e.preventDefault();active=Math.min(active+1,opts.length-1);paintActive()}
-    else if(e.key==="ArrowUp"){e.preventDefault();active=Math.max(active-1,0);paintActive()}
-    else if(e.key==="Enter"||e.key==="Tab"){if(e.key==="Enter")e.preventDefault();pick(opts[active])}
-    else if(e.key==="Escape"){close()}
+  input.addEventListener("keydown", e => {
+    if (!opts.length) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(active + 1, opts.length - 1); paintActive(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(active - 1, 0); paintActive(); }
+    else if (e.key === "Enter" || e.key === "Tab") { if (e.key === "Enter") e.preventDefault(); pick(opts[active]); }
+    else if (e.key === "Escape") close();
   });
-  // Leaving the field with text typed but nothing chosen: take the best match.
-  input.addEventListener("blur",async()=>{
+  // Left the field with text typed but nothing chosen: take the best match.
+  input.addEventListener("blur", async () => {
     clearTimeout(timer);
-    const q=input.value.trim();
-    if(state[side]||q.length<2)return;
-    const r=await API.search(q);
-    if(!state[side]&&r.length&&input.value.trim()===q)pick(r[0]);
+    const q = input.value.trim();
+    if (state[side] || q.length < 2) return;
+    const r = await API.search(q);
+    if (!state[side] && r.length && input.value.trim() === q) pick(r[0]);
   });
-  document.addEventListener("mousedown",e=>{if(!wrap.contains(e.target))close()});
-  wrap.append(lab,input,list);return wrap;
+  closers.add(e => { if (!wrap.contains(e.target)) close(); });
+  wrap.append(input, list);
+  return wrap;
 }
 
-// ---------- result card ----------
-function leg(side,name,l,currency){
-  return el("div",{class:`leg leg-${side}`},el("span",{class:"leg-dot"}),
-    el("div",{class:"leg-body"},
-      el("div",{class:"leg-top"},el("span",{class:"leg-name"},name),el("span",{class:"leg-price"},fmt(l.price,currency))),
-      el("div",{class:"leg-route"},el("code",{},l.origin),el("span",{class:"arrow"},"→"),el("code",{},l.destination),
-        el("span",{class:"leg-flags"},`${l.nonStop?"diretto":"scalo"} · ${mins(l.durationMinutes)}`))));
+// ---------- results ----------
+function legLine(side, name, l, currency) {
+  return el("span", { class: `leg ${side}` },
+    el("span", { class: "leg-line" }),
+    el("span", { class: "leg-name" }, name),
+    el("span", { class: "leg-price" }, fmt(l.price, currency)),
+    el("span", { class: "leg-info" }, `da ${l.origin} a ${l.destination}, ${l.nonStop ? "diretto" : "con scalo"}, ${mins(l.durationMinutes)}`));
 }
-function resultCard(item,rank,labels){
-  const{destination:d,travelerA:A,travelerB:B,total,currency,fairness}=item;
-  const aShare=(A.price/total)*100;
-  const fairClass=fairness>=0.75?"fair-hi":fairness>=0.5?"fair-mid":"fair-lo";
-  const head=el("div",{class:"result-head"},
-    el("div",{},el("h3",{},d.city),el("p",{class:"result-country",html:`${d.country} · <code>${d.code}</code>`})),
-    el("div",{class:"result-total"},el("span",{class:"total-num"},fmt(total,currency)),el("span",{class:"total-lbl"},"totale combinato"),rank===0?el("span",{class:"best-tag"},"più conveniente"):null));
-  const split=el("div",{class:"split"},el("div",{class:"split-a"}),el("div",{class:"split-b"}));
-  split.children[0].style.width=aShare+"%";split.children[1].style.width=(100-aShare)+"%";
-  const foot=el("div",{class:"result-foot"},
-    el("span",{class:`fair ${fairClass}`},`equità split ${Math.round(fairness*100)}%`),
-    item.bothNonStop?el("span",{class:"chip"},"entrambi diretti"):null,
-    el("span",{class:"chip subtle"},`volo tot ${mins(item.combinedDurationMinutes)}`));
-  return el("article",{class:`result ${rank===0?"is-best":""}`},
-    el("div",{class:"result-rank"},rank===0?"★":String(rank+1).padStart(2,"0")),
-    el("div",{class:"result-main"},head,split,
-      el("div",{class:"legs"},leg("a",labels.a,A,currency),leg("b",labels.b,B,currency)),foot));
+function row(it, i, labels) {
+  const { destination: d, travelerA: A, travelerB: B, total, currency } = it;
+  const share = (A.price / total) * 100;
+  const sa = el("i", { class: "sa" }), sb = el("i", { class: "sb" });
+  sa.style.width = share + "%"; sb.style.width = (100 - share) + "%";
+  return el("li", {}, el("button", {
+    type: "button", class: "row", "aria-pressed": String(i === state.sel), onclick: () => select(i)
+  },
+    el("span", { class: "row-head" },
+      el("span", { class: "row-place" },
+        el("span", { class: "row-city" }, d.city), i === 0 ? el("span", { class: "best" }, "la più economica") : null,
+        el("span", { class: "row-country" }, d.country)),
+      el("span", { class: "row-price" }, el("span", { class: "row-total" }, fmt(total, currency)), el("span", { class: "row-sub" }, "in due"))),
+    legLine("a", labels.a, A, currency),
+    legLine("b", labels.b, B, currency),
+    el("span", { class: "split" }, sa, sb),
+    el("span", { class: "gap" }, it.priceDiff === 0 ? "Spesa uguale" : `Differenza tra voi: ${fmt(it.priceDiff, currency)}`)));
 }
-
-// ---------- provider badge (updated in place, never re-renders the form) ----------
-function paintProvider(){
-  const b=document.getElementById("prov"),f=document.getElementById("foot-note");
-  if(b){b.hidden=!state.provider;b.className=`provider provider-${isLive()?"amadeus":"mock"}`;b.textContent=`dati: ${isLive()?state.provider:"demo"}`}
-  if(f)f.textContent=isLive()?"Tariffe live.":"Prezzi generati per la demo. Collega Duffel per tariffe reali.";
-}
-
-// ---------- main render ----------
-const root=document.getElementById("root");
-function App(){
-  root.innerHTML="";
-  const page=el("div",{class:"page"});
-  page.append(el("div",{class:"orbit orbit-a"}),el("div",{class:"orbit orbit-b"}));
-
-  page.append(el("div",{class:"masthead"},
-    el("div",{class:"brand"},el("span",{class:"brand-mark"},el("i",{class:"mark-a"}),el("i",{class:"mark-b"})),"MidPoint"),
-    el("span",{id:"prov",class:"provider"})));
-
-  page.append(el("section",{class:"hero"},
-    el("h1",{html:`Due partenze.<br><em>Un punto d'incontro</em><br>al prezzo più basso.`}),
-    el("p",{class:"hero-sub",html:`Voi partite da città diverse e volete vedervi in una terza. MidPoint trova le destinazioni raggiungibili da entrambi e le ordina per <strong>costo totale dei due biglietti</strong>.`})));
-
-  const console_=el("section",{class:"console"});
-  const go=el("button",{class:"go"},state.loading?"Cerco i punti d'incontro…":"Trova dove vedervi");
-  const warn=el("p",{class:"hint warn"},"Scegliete due città di partenza diverse.");
-  const refreshGo=()=>{
-    const ok=state.a&&state.b&&!sameCity()&&state.depart;
-    go.disabled=!(ok&&!state.loading);
-    warn.hidden=!sameCity();
-  };
-
-  const cities=el("div",{class:"cities"});
-  cities.append(cityInput("a","Chi parte da qui",refreshGo),
-    el("div",{class:"converge"},el("span",{class:"conv-line"}),el("span",{class:"conv-node"}),el("span",{class:"conv-line"})),
-    cityInput("b","…e chi da qui",refreshGo));
-  console_.append(cities);
-
-  const names=el("div",{class:"names"});
-  const nA=el("input",{class:"name-a",value:state.nameA,"aria-label":"Nome A"});nA.addEventListener("input",e=>state.nameA=e.target.value);
-  const nB=el("input",{class:"name-b",value:state.nameB,"aria-label":"Nome B"});nB.addEventListener("input",e=>state.nameB=e.target.value);
-  names.append(nA,nB);console_.append(names);
-
-  const controls=el("div",{class:"controls"});
-  const dDep=el("input",{type:"date",value:state.depart,min:todayISO()});
-  const dRet=el("input",{type:"date",value:state.ret,min:state.depart});if(!state.roundTrip)dRet.disabled=true;
-  dDep.addEventListener("change",e=>{state.depart=e.target.value;dRet.min=state.depart;if(state.ret<state.depart){state.ret=state.depart;dRet.value=state.ret}refreshGo()});
-  dRet.addEventListener("change",e=>state.ret=e.target.value);
-  const bud=el("input",{type:"number",placeholder:"nessun limite",min:"0",value:state.budget});bud.addEventListener("input",e=>state.budget=e.target.value);
-  controls.append(el("label",{class:"ctl"},el("span",{},"Andata"),dDep),el("label",{class:"ctl"},el("span",{},"Ritorno"),dRet),el("label",{class:"ctl budget"},el("span",{},"Budget totale max"),bud));
-  console_.append(controls);
-
-  const toggles=el("div",{class:"toggles"});
-  const tRT=el("button",{type:"button",class:`toggle ${state.roundTrip?"on":""}`},state.roundTrip?"Andata e ritorno":"Solo andata");
-  tRT.addEventListener("click",()=>{state.roundTrip=!state.roundTrip;App()});
-  const tNS=el("button",{type:"button",class:`toggle ${state.nonStop?"on":""}`},state.nonStop?"Solo voli diretti":"Diretti + scali");
-  tNS.addEventListener("click",()=>{state.nonStop=!state.nonStop;App()});
-  toggles.append(tRT,tNS);console_.append(toggles);
-
-  // esempi cliccabili
-  const ex=el("div",{class:"examples"},el("span",{class:"examples-lbl"},"Prova con:"));
-  EXAMPLES.forEach(([x,y])=>ex.append(el("button",{type:"button",class:"example",onclick:async()=>{
-    const [ra,rb]=await Promise.all([API.search(x),API.search(y)]);
-    if(!ra[0]||!rb[0])return;
-    state.a=ra[0];state.textA=ra[0].text;state.b=rb[0];state.textB=rb[0].text;state.data=null;state.error="";App();
-  }},`${x} ↔ ${y}`)));
-  console_.append(ex);
-
-  go.addEventListener("click",run);
-  console_.append(go,warn);
-  refreshGo();
-  page.append(console_);
-
-  const results=el("section",{class:"results"});
-  if(state.error)results.append(el("p",{class:"error"},state.error));
-  if(state.loading){const sk=el("div",{class:"skeletons"});[0,1,2].forEach(()=>sk.append(el("div",{class:"skeleton"})));results.append(sk)}
-  if(state.data&&!state.loading){
-    const labels={a:state.nameA.trim()||"Viaggiatore A",b:state.nameB.trim()||"Viaggiatore B"};
-    results.append(el("div",{class:"results-meta"},
-      el("span",{html:`<strong>${state.data.results.length}</strong> punti d'incontro trovati${state.data.count>state.data.results.length?` su ${state.data.count}`:""}`}),
-      el("span",{class:"sort-note"},"ordinati per costo totale ↑")));
-    if(state.data.results.length===0){results.append(el("div",{class:"empty"},"Nessuna città raggiungibile da entrambi con questi filtri. Prova ad alzare il budget o a includere i voli con scalo."))}
-    else{const cards=el("div",{class:"cards"});state.data.results.forEach((it,i)=>cards.append(resultCard(it,i,labels)));results.append(cards)}
+function fillPane(pane) {
+  listEl = null;
+  if (state.error) { pane.append(el("p", { class: "err", role: "alert" }, state.error)); return; }
+  if (state.loading) { const l = el("div", { class: "list" }); for (let i = 0; i < 3; i++) l.append(el("div", { class: "sk" })); pane.append(l); return; }
+  if (!state.data) {
+    pane.append(el("div", { class: "hint-box" },
+      el("p", {}, "Scrivi le due città di partenza e le date. Cerco la terza città dove spendete meno in due."),
+      el("p", {}, "Se una città ha più aeroporti li provo tutti: Milano vuol dire Malpensa, Linate e Bergamo.")));
+    return;
   }
-  page.append(results);
+  const res = state.data.results;
+  if (!res.length) {
+    pane.append(el("p", { class: "hint-box" }, "Nessuna città raggiungibile da entrambi con questi filtri. Prova ad alzare il budget o a includere i voli con scalo."));
+    return;
+  }
+  const labels = { a: state.nameA.trim() || "Tu", b: state.nameB.trim() || "Lei / Lui" };
+  pane.append(el("p", { class: "pane-h" },
+    `${state.data.count} città raggiungibili da entrambi. Ecco le ${res.length} più economiche.`,
+    el("small", {}, `Prezzi per persona, ${state.roundTrip ? "andata e ritorno" : "sola andata"}.`)));
+  const list = el("ol", { class: "list" });
+  res.forEach((it, i) => list.append(row(it, i, labels)));
+  pane.append(list);
+  listEl = list;
+}
 
-  page.append(el("footer",{class:"site-foot"},el("span",{},"MidPoint · dimostrazione"),el("span",{id:"foot-note"})));
-  root.append(page);
+function select(i, fromMap) {
+  state.sel = i;
+  if (listEl) [...listEl.querySelectorAll(".row")].forEach((b, k) => b.setAttribute("aria-pressed", String(k === i)));
+  paintMap(true);
+  if (fromMap && listEl && listEl.children[i]) listEl.children[i].scrollIntoView({ block: "nearest", behavior: reduceMotion() ? "auto" : "smooth" });
+}
+
+// ---------- map ----------
+// Equirectangular projection scaled by cos(49°), covering lon -25..36, lat 33..66 in a 1000x825 frame.
+const KX = 16.4, VW = 1000, VH = 825;
+const proj = (lat, lon) => ({ x: (lon + 25) * KX, y: (66 - lat) * 25 });
+const recOf = o => (o && o.codes ? o.codes.map(c => cityByCode.get(c)).find(Boolean) : null);
+const arc = (p, q) => {
+  const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2, dx = q.x - p.x, dy = q.y - p.y;
+  let nx = -dy, ny = dx;
+  if (ny > 0) { nx = -nx; ny = -ny; } // bow the thread northwards
+  const k = 0.18;
+  return `M${p.x.toFixed(1)} ${p.y.toFixed(1)} Q${(mx + nx * k).toFixed(1)} ${(my + ny * k).toFixed(1)} ${q.x.toFixed(1)} ${q.y.toFixed(1)}`;
+};
+
+function paintMap(animate) {
+  if (!mapSvg) return;
+  const cw = mapSvg.getBoundingClientRect().width || 600;
+  const A = recOf(state.a), B = recOf(state.b);
+  const results = state.data && !state.loading ? state.data.results : [];
+  const selIdx = results.length ? Math.min(state.sel, results.length - 1) : -1;
+  const dests = results.map(r => cityByCode.get(r.destination.code));
+  const D = selIdx >= 0 ? dests[selIdx] : null;
+
+  // View: frame the two origins and every result; full Europe when nothing is chosen.
+  let v = { x: 0, y: 0, w: VW, h: VH };
+  const pts = [A, B, ...dests].filter(Boolean).map(c => proj(c.lat, c.lon));
+  if (pts.length) {
+    const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+    const padX = Math.max((maxX - minX) * 0.18, 60), padY = Math.max((maxY - minY) * 0.18, 60);
+    let w = maxX - minX + 2 * padX, h = maxY - minY + 2 * padY;
+    const asp = VW / VH;
+    if (w / h > asp) h = w / asp; else w = h * asp;
+    w = Math.min(Math.max(w, 380), VW); h = w / asp;
+    v = { w, h, x: Math.min(Math.max((minX + maxX) / 2 - w / 2, 0), VW - w), y: Math.min(Math.max((minY + maxY) / 2 - h / 2, 0), VH - h) };
+  }
+  mapSvg.setAttribute("viewBox", `${v.x.toFixed(1)} ${v.y.toFixed(1)} ${v.w.toFixed(1)} ${v.h.toFixed(1)}`);
+  const u = v.w / cw; // viewBox units per screen pixel, so sizes stay constant on screen
+
+  const anchor = p => { const rx = (p.x - v.x) / v.w; return rx < 0.14 ? "start" : rx > 0.86 ? "end" : "middle"; };
+  const label = (p, t, dy, size = 14) =>
+    `<text x="${p.x.toFixed(1)}" y="${(p.y + dy * u).toFixed(1)}" text-anchor="${anchor(p)}" font-size="${(size * u).toFixed(2)}" font-weight="650" fill="var(--ink)" stroke-width="${(4 * u).toFixed(2)}">${esc(t)}</text>`;
+
+  const out = [];
+  const grid = "rgba(18,38,58,.10)";
+  for (let lat = 30; lat <= 70; lat += 10) { const y = (66 - lat) * 25; out.push(`<line x1="0" x2="${VW}" y1="${y}" y2="${y}" stroke="${grid}" stroke-width="${u.toFixed(2)}"/>`); }
+  for (let lon = -20; lon <= 40; lon += 10) { const x = (lon + 25) * KX; out.push(`<line x1="${x}" x2="${x}" y1="0" y2="${VH}" stroke="${grid}" stroke-width="${u.toFixed(2)}"/>`); }
+
+  const special = new Set([A && A.code, B && B.code, ...dests.map(c => c && c.code)]);
+  for (const c of state.cities) {
+    if (special.has(c.code)) continue;
+    const p = proj(c.lat, c.lon);
+    out.push(`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(2.6 * u).toFixed(2)}" fill="var(--ink)" fill-opacity=".28"/>`);
+  }
+
+  const pD = D ? proj(D.lat, D.lon) : null;
+  if (pD) {
+    const draw = animate && !reduceMotion();
+    [[A, "var(--a)", 0], [B, "var(--b)", 0.12]].forEach(([c, col, delay]) => {
+      if (!c) return;
+      out.push(`<path pathLength="1" class="thread${draw ? " draw" : ""}" style="animation-delay:${delay}s" d="${arc(proj(c.lat, c.lon), pD)}" stroke="${col}" stroke-width="${(3.6 * u).toFixed(2)}"/>`);
+    });
+  }
+
+  dests.forEach((c, i) => {
+    if (!c || i === selIdx) return;
+    const p = proj(c.lat, c.lon);
+    out.push(`<g data-i="${i}" style="cursor:pointer"><title>${esc(results[i].destination.city)}</title><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(15 * u).toFixed(2)}" fill="transparent"/><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(5.5 * u).toFixed(2)}" fill="var(--surface)" stroke="var(--ink)" stroke-width="${(1.6 * u).toFixed(2)}"/></g>`);
+  });
+
+  [[A, "var(--a)", state.a], [B, "var(--b)", state.b]].forEach(([c, col, o]) => {
+    if (!c) return;
+    const p = proj(c.lat, c.lon);
+    out.push(`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(8 * u).toFixed(2)}" fill="${col}"/><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(3 * u).toFixed(2)}" fill="var(--surface)"/>`);
+    out.push(label(p, o.city, -16));
+  });
+  if (pD) {
+    out.push(`<circle cx="${pD.x.toFixed(1)}" cy="${pD.y.toFixed(1)}" r="${(12 * u).toFixed(2)}" fill="var(--surface)" stroke="var(--ink)" stroke-width="${(3 * u).toFixed(2)}"/><circle cx="${pD.x.toFixed(1)}" cy="${pD.y.toFixed(1)}" r="${(5 * u).toFixed(2)}" fill="var(--ink)"/>`);
+    out.push(label(pD, results[selIdx].destination.city, 30, 15));
+  }
+  mapSvg.innerHTML = out.join("");
+
+  // caption
+  let cap;
+  if (selIdx >= 0 && state.a && state.b) {
+    const r = results[selIdx];
+    cap = `<strong>${esc(state.a.city)}</strong> e <strong>${esc(state.b.city)}</strong> si incontrano a <strong>${esc(r.destination.city)}</strong>: ${esc(fmt(r.total, r.currency))} in due.`;
+  } else if (state.a && state.b) {
+    cap = `${esc(state.a.city)} e ${esc(state.b.city)}. Premi “Trova dove vederci” per cercare la città dove spendete meno.`;
+  } else if (state.a || state.b) {
+    cap = `${esc((state.a || state.b).city)} è sulla mappa. Ora scegli l'altra città.`;
+  } else {
+    cap = "Le due città compaiono qui appena le scegli.";
+  }
+  if (capEl) capEl.innerHTML = cap;
+}
+
+// ---------- provider badge (updated in place) ----------
+function paintProvider() {
+  const b = document.getElementById("prov"), f = document.getElementById("foot-note");
+  if (b) { b.hidden = !state.provider; b.classList.toggle("live", isLive()); b.textContent = isLive() ? "Tariffe reali" : "Prezzi di prova"; }
+  if (f) f.textContent = isLive() ? "Tariffe reali da Duffel." : "Prezzi di prova. Con Duffel collegato diventano tariffe reali.";
+}
+
+// ---------- page ----------
+const root = document.getElementById("root");
+
+function App(animate) {
+  root.innerHTML = "";
+  closers.clear();
+  const wrap = el("div", { class: "wrap" });
+
+  wrap.append(el("header", { class: "top" },
+    el("div", { class: "brand-line" },
+      el("a", { class: "brand", href: "/" }, el("span", { class: "mark", "aria-hidden": "true" }, el("i", { class: "ma" }), el("i", { class: "mb" })), "MidPoint"),
+      el("span", { class: "tag" }, "per chi ha gli amici in un'altra città")),
+    el("span", { id: "prov", class: "mode" })));
+
+  const go = el("button", { class: "go", type: "submit" }, state.loading ? "Cerco…" : "Trova dove vederci");
+  const warn = el("p", { class: "warn", role: "alert" }, "Scegli due città di partenza diverse.");
+  const refreshGo = () => {
+    const ok = state.a && state.b && !sameCity() && state.depart;
+    go.disabled = !(ok && !state.loading);
+    warn.hidden = !sameCity();
+    paintMap(false);
+  };
+
+  const title = el("h1", { class: "ask-title" },
+    "Da ", cityInput("a", "la tua città", "Prima città di partenza", refreshGo),
+    " e da ", cityInput("b", "la sua città", "Seconda città di partenza", refreshGo),
+    ", dove ci vediamo?");
+
+  const dDep = el("input", { type: "date", value: state.depart, min: todayISO(), "aria-label": "Data di andata" });
+  const dRet = el("input", { type: "date", value: state.ret, min: state.depart, "aria-label": "Data di ritorno" });
+  dDep.addEventListener("change", e => {
+    state.depart = e.target.value; dRet.min = state.depart;
+    if (state.ret < state.depart) { state.ret = state.depart; dRet.value = state.ret; }
+    refreshGo();
+  });
+  dRet.addEventListener("change", e => { state.ret = e.target.value; });
+  const bud = el("input", { type: "number", inputmode: "numeric", min: "0", placeholder: "nessun limite", value: state.budget, "aria-label": "Budget massimo totale in euro" });
+  const eur = el("span", {}, state.budget ? " €" : "");
+  bud.addEventListener("input", e => { state.budget = e.target.value; eur.textContent = state.budget ? " €" : ""; });
+  const tRT = el("button", { type: "button", class: "t", onclick: () => { state.roundTrip = !state.roundTrip; App(); } }, state.roundTrip ? "solo andata" : "Vuoi aggiungere il ritorno");
+  const tNS = el("button", { type: "button", class: "t", onclick: () => { state.nonStop = !state.nonStop; App(); } }, state.nonStop ? "solo voli diretti" : "voli diretti e con scalo");
+  const when = el("p", { class: "when" },
+    el("span", { class: "ln" }, "Si parte il ", dDep,
+      state.roundTrip ? [" e si torna il ", dRet, ", oppure ", tRT, "."] : [", solo andata. ", tRT, "?"]),
+    el("span", { class: "ln" }, "Budget totale per voi due: ", bud, eur),
+    el("span", { class: "ln" }, "Cerco ", tNS, "."));
+
+  const nA = el("input", { value: state.nameA, "aria-label": "Nome del primo viaggiatore" });
+  const nB = el("input", { value: state.nameB, "aria-label": "Nome del secondo viaggiatore" });
+  nA.addEventListener("input", e => { state.nameA = e.target.value; });
+  nB.addEventListener("input", e => { state.nameB = e.target.value; });
+  const names = el("p", { class: "names" },
+    "Nei risultati vi chiamo",
+    el("label", {}, el("span", { class: "sw a" }), nA), "e",
+    el("label", {}, el("span", { class: "sw b" }), nB));
+
+  const ex = el("p", { class: "try" }, "Per provare: ");
+  EXAMPLES.forEach(([x, y], i) => {
+    ex.append(el("button", { type: "button", class: "t", onclick: () => useExample(x, y) }, `${x} e ${y}`));
+    if (i < EXAMPLES.length - 1) ex.append(", ");
+  });
+  ex.append(".");
+
+  wrap.append(el("form", { class: "ask", novalidate: "", onsubmit: e => { e.preventDefault(); run(); } }, title, when, names, go, warn, ex));
+
+  // map + results
+  const pane = el("div", { class: "pane" });
+  fillPane(pane);
+  mapSvg = document.createElementNS(NS, "svg");
+  mapSvg.setAttribute("viewBox", `0 0 ${VW} ${VH}`);
+  mapSvg.setAttribute("role", "img");
+  mapSvg.setAttribute("aria-label", "Mappa dell'Europa con le città di partenza e i punti d'incontro");
+  mapSvg.addEventListener("click", e => { const g = e.target.closest("[data-i]"); if (g) select(+g.dataset.i, true); });
+  capEl = el("p", { class: "cap" });
+  wrap.append(el("section", { class: "board", id: "board", "aria-live": "polite" }, pane,
+    el("div", { class: "map-wrap" }, el("div", { class: "map" }, mapSvg), capEl)));
+
+  wrap.append(el("footer", { class: "foot" },
+    el("span", {}, "Fatto per scegliere dove vedersi senza litigare sul prezzo."),
+    el("span", { id: "foot-note" })));
+
+  root.append(wrap);
+  refreshGo();
+  paintMap(!!animate);
   paintProvider();
 }
 
-async function run(){
-  if(!(state.a&&state.b&&!sameCity()&&state.depart))return;
-  state.loading=true;state.error="";state.data=null;App();
-  try{
-    const res=await API.meeting({originA:state.a.codes,originB:state.b.codes,departDate:state.depart,returnDate:state.roundTrip?state.ret:null,nonStop:state.nonStop,maxTotalBudget:state.budget?Number(state.budget):null,limit:12});
-    state.data=res;if(res.provider)state.provider=res.provider;
-  }catch(e){state.error=e.message}
-  finally{state.loading=false;App()}
+const scrollToBoard = () => {
+  const b = document.getElementById("board");
+  if (b) b.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+};
+
+async function useExample(x, y) {
+  const [ra, rb] = await Promise.all([API.search(x), API.search(y)]);
+  if (!ra[0] || !rb[0]) return;
+  state.a = ra[0]; state.textA = ra[0].text; state.b = rb[0]; state.textB = rb[0].text;
+  state.data = null; state.error = ""; state.sel = 0;
+  App();
 }
 
+async function run() {
+  if (!(state.a && state.b && !sameCity() && state.depart)) return;
+  state.loading = true; state.error = ""; state.data = null; state.sel = 0;
+  App(); scrollToBoard();
+  try {
+    const res = await API.meeting({
+      originA: state.a.codes, originB: state.b.codes, departDate: state.depart,
+      returnDate: state.roundTrip ? state.ret : null, nonStop: state.nonStop,
+      maxTotalBudget: state.budget ? Number(state.budget) : null, limit: 12
+    });
+    state.data = res; if (res.provider) state.provider = res.provider;
+  } catch (e) { state.error = e.message; }
+  finally { state.loading = false; App(true); }
+}
+
+let rt;
+addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => paintMap(false), 120); });
+
 App();
-API.provider().then(p=>{if(p){state.provider=p;paintProvider()}});
+API.cities().then(list => {
+  state.cities = list;
+  list.forEach(c => c.codes.forEach(code => cityByCode.set(code, c)));
+  paintMap(false);
+});
+API.provider().then(p => { if (p) { state.provider = p; paintProvider(); } });
 </script>
 </body>
 </html>

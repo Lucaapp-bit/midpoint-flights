@@ -1,4 +1,4 @@
-const { getAirport, primaryAirports } = require("./_airports.js");
+const { getAirport, primaryAirports, itCity, itCountry } = require("./_airports.js");
 const { priceLeg, providerName } = require("./_providers.js");
 
 const MAX_ORIGINS = 6;
@@ -91,7 +91,7 @@ module.exports = async (req, res) => {
       const fairness = total === 0 ? 1 : 1 - diff / total;
 
       results.push({
-        destination: { code: dest, city: airport.city, country: airport.country },
+        destination: { code: dest, city: itCity(airport.city), country: itCountry(airport.country) },
         travelerA: fa,
         travelerB: fb,
         total,
