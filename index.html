@@ -83,9 +83,15 @@ button,input{font:inherit;color:inherit}
 .board{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(24px,4vw,56px);margin-top:clamp(40px,6vw,72px);padding-bottom:72px;align-items:start;scroll-margin-top:16px}
 .pane{grid-column:1;grid-row:1}
 .map-wrap{grid-column:2;grid-row:1;position:sticky;top:20px}
-.map{background:var(--sea);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.map svg{display:block;width:100%;height:auto;aspect-ratio:1000/825}
-.map text{font-family:inherit;paint-order:stroke;stroke:var(--sea);stroke-linejoin:round}
+.map{position:relative;background:var(--sea);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.map svg{display:block;width:100%;height:auto;aspect-ratio:1000/660}
+.map text{font-family:inherit;paint-order:stroke;stroke:#F3F6F4;stroke-linejoin:round}
+.map text.tt{stroke:none}
+.land{fill:#F3F6F4;stroke:rgba(18,38,58,.35);stroke-width:1px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.borders{fill:none;stroke:rgba(18,38,58,.2);stroke-width:.7px;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.zoom{position:absolute;right:10px;top:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:.85rem;font-weight:550;color:var(--ink);cursor:pointer}
+.zoom:hover{background:#fff}
+.zoom[hidden]{display:none}
 .thread{fill:none;stroke-linecap:round;stroke-dasharray:1}
 .thread.draw{animation:draw .8s cubic-bezier(.3,.7,.2,1) both}
 @keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
@@ -208,7 +214,7 @@ const state = {
   a: null, b: null, textA: "", textB: "", nameA: "Tu", nameB: "Lei / Lui",
   depart: plusDays(todayISO(), 30), ret: plusDays(todayISO(), 33),
   roundTrip: true, nonStop: false, budget: "",
-  loading: false, error: "", data: null, sel: 0, provider: null, cities: []
+  loading: false, error: "", data: null, sel: 0, provider: null, cities: [], mapMode: "fit"
 };
 const cityByCode = new Map();
 const isLive = () => !!state.provider && !state.provider.startsWith("mock");
@@ -250,11 +256,11 @@ function cityInput(side, placeholder, label, onChange) {
     const over = list.getBoundingClientRect().right - (window.innerWidth - 12);
     if (over > 0) list.style.left = -over + "px";
   };
-  const pick = o => { state[side] = o; state[textKey] = o.text; input.value = o.text; fit(input); close(); onChange(); };
+  const pick = o => { state[side] = o; state[textKey] = o.text; input.value = o.text; fit(input); close(); onChange("pick"); };
   const search = async q => { const my = ++seq; const r = await API.search(q); return my === seq ? r : null; };
 
   input.addEventListener("input", () => {
-    state[side] = null; state[textKey] = input.value; fit(input); onChange();
+    state[side] = null; state[textKey] = input.value; fit(input); onChange("type");
     clearTimeout(timer);
     const q = input.value.trim();
     if (q.length < 2) { seq++; close(); return; }
@@ -334,15 +340,18 @@ function fillPane(pane) {
 function select(i, fromMap) {
   state.sel = i;
   if (listEl) [...listEl.querySelectorAll(".row")].forEach((b, k) => b.setAttribute("aria-pressed", String(k === i)));
-  paintMap(true);
+  paintMap({ draw: true });
   if (fromMap && listEl && listEl.children[i]) listEl.children[i].scrollIntoView({ block: "nearest", behavior: reduceMotion() ? "auto" : "smooth" });
 }
 
 // ---------- map ----------
-// Equirectangular projection scaled by cos(49°), covering lon -25..36, lat 33..66 in a 1000x825 frame.
-const KX = 16.4, VW = 1000, VH = 825;
-const proj = (lat, lon) => ({ x: (lon + 25) * KX, y: (66 - lat) * 25 });
+// Web Mercator: the world is 1000 units wide (lon -180..180). Land and borders come from /world.json
+// (Natural Earth 50m, simplified offline). Markers are sized in screen pixels through u = units per pixel.
+const VW = 1000, VH = 660, ASP = VW / VH, R = VW / (2 * Math.PI);
+const WORLD = { x: 0, y: -372, w: VW, h: VH };
+const proj = (lat, lon) => ({ x: (lon + 180) * VW / 360, y: -R * Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) });
 const recOf = o => (o && o.codes ? o.codes.map(c => cityByCode.get(c)).find(Boolean) : null);
+const clamp = (n, a, b) => Math.min(Math.max(n, a), b);
 const arc = (p, q) => {
   const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2, dx = q.x - p.x, dy = q.y - p.y;
   let nx = -dy, ny = dx;
@@ -351,75 +360,176 @@ const arc = (p, q) => {
   return `M${p.x.toFixed(1)} ${p.y.toFixed(1)} Q${(mx + nx * k).toFixed(1)} ${(my + ny * k).toFixed(1)} ${q.x.toFixed(1)} ${q.y.toFixed(1)}`;
 };
 
-function paintMap(animate) {
-  if (!mapSvg) return;
-  const cw = mapSvg.getBoundingClientRect().width || 600;
+let landG = null, dynG = null, zoomBtn = null, curView = { ...WORLD }, flight = 0;
+const mctx = document.createElement("canvas").getContext("2d");
+const textW = (t, px, wt = 650) => { mctx.font = `${wt} ${px}px "Bricolage Grotesque", system-ui, sans-serif`; return mctx.measureText(t).width; };
+const sameView = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.w - b.w) < 0.5;
+const setView = v => { curView = v; mapSvg.setAttribute("viewBox", `${v.x.toFixed(2)} ${v.y.toFixed(2)} ${v.w.toFixed(2)} ${v.h.toFixed(2)}`); };
+
+// The map element lives for the whole session; App() only moves it into the new page.
+function ensureMap() {
+  if (mapSvg) return;
+  mapSvg = document.createElementNS(NS, "svg");
+  mapSvg.setAttribute("role", "img");
+  mapSvg.setAttribute("aria-label", "Mappa del mondo con le città di partenza e i punti d'incontro");
+  mapSvg.setAttribute("viewBox", `${curView.x} ${curView.y} ${curView.w} ${curView.h}`);
+  landG = document.createElementNS(NS, "g");
+  dynG = document.createElementNS(NS, "g");
+  mapSvg.append(landG, dynG);
+  mapSvg.addEventListener("click", e => { const g = e.target.closest("[data-i]"); if (g) select(+g.dataset.i, true); });
+  fetch("/world.json").then(r => r.json()).then(w => {
+    landG.innerHTML = `<path class="land" d="${w.land}"/><path class="borders" d="${w.borders}"/>`;
+  }).catch(() => {});
+}
+
+function content() {
   const A = recOf(state.a), B = recOf(state.b);
   const results = state.data && !state.loading ? state.data.results : [];
-  const selIdx = results.length ? Math.min(state.sel, results.length - 1) : -1;
   const dests = results.map(r => cityByCode.get(r.destination.code));
-  const D = selIdx >= 0 ? dests[selIdx] : null;
+  return { A, B, results, dests };
+}
 
-  // View: frame the two origins and every result; full Europe when nothing is chosen.
-  let v = { x: 0, y: 0, w: VW, h: VH };
+// Whole world when nothing is chosen or when asked; otherwise frame both origins and every result.
+function targetView() {
+  const { A, B, dests } = content();
   const pts = [A, B, ...dests].filter(Boolean).map(c => proj(c.lat, c.lon));
-  if (pts.length) {
-    const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
-    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
-    const padX = Math.max((maxX - minX) * 0.18, 60), padY = Math.max((maxY - minY) * 0.18, 60);
-    let w = maxX - minX + 2 * padX, h = maxY - minY + 2 * padY;
-    const asp = VW / VH;
-    if (w / h > asp) h = w / asp; else w = h * asp;
-    w = Math.min(Math.max(w, 380), VW); h = w / asp;
-    v = { w, h, x: Math.min(Math.max((minX + maxX) / 2 - w / 2, 0), VW - w), y: Math.min(Math.max((minY + maxY) / 2 - h / 2, 0), VH - h) };
-  }
-  mapSvg.setAttribute("viewBox", `${v.x.toFixed(1)} ${v.y.toFixed(1)} ${v.w.toFixed(1)} ${v.h.toFixed(1)}`);
-  const u = v.w / cw; // viewBox units per screen pixel, so sizes stay constant on screen
+  if (!pts.length || state.mapMode === "world") return { ...WORLD };
+  const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const padX = Math.max((maxX - minX) * 0.22, 12), padY = Math.max((maxY - minY) * 0.3, 12);
+  let w = maxX - minX + 2 * padX, h = maxY - minY + 2 * padY;
+  if (w / h > ASP) h = w / ASP; else w = h * ASP;
+  w = clamp(w, 150, VW); h = w / ASP;
+  return { w, h, x: clamp((minX + maxX) / 2 - w / 2, 0, VW - w), y: clamp((minY + maxY) / 2 - h / 2, WORLD.y, WORLD.y + VH - h) };
+}
 
-  const anchor = p => { const rx = (p.x - v.x) / v.w; return rx < 0.14 ? "start" : rx > 0.86 ? "end" : "middle"; };
-  const label = (p, t, dy, size = 14) =>
-    `<text x="${p.x.toFixed(1)}" y="${(p.y + dy * u).toFixed(1)}" text-anchor="${anchor(p)}" font-size="${(size * u).toFixed(2)}" font-weight="650" fill="var(--ink)" stroke-width="${(4 * u).toFixed(2)}">${esc(t)}</text>`;
+function flyTo(target, done) {
+  cancelAnimationFrame(flight);
+  const from = { ...curView };
+  if (reduceMotion() || sameView(from, target)) { done(); return; }
+  const cx0 = from.x + from.w / 2, cy0 = from.y + from.h / 2, cx1 = target.x + target.w / 2, cy1 = target.y + target.h / 2;
+  const t0 = performance.now(), D = 850;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / D), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    const w = Math.exp(Math.log(from.w) + (Math.log(target.w) - Math.log(from.w)) * e), h = w / ASP;
+    const cx = cx0 + (cx1 - cx0) * e, cy = cy0 + (cy1 - cy0) * e;
+    const v = { x: cx - w / 2, y: cy - h / 2, w, h };
+    if (k < 1) { setView(v); renderDyn(v, { threads: false }); flight = requestAnimationFrame(step); } else done();
+  };
+  flight = requestAnimationFrame(step);
+}
 
-  const out = [];
-  const grid = "rgba(18,38,58,.10)";
-  for (let lat = 30; lat <= 70; lat += 10) { const y = (66 - lat) * 25; out.push(`<line x1="0" x2="${VW}" y1="${y}" y2="${y}" stroke="${grid}" stroke-width="${u.toFixed(2)}"/>`); }
-  for (let lon = -20; lon <= 40; lon += 10) { const x = (lon + 25) * KX; out.push(`<line x1="${x}" x2="${x}" y1="0" y2="${VH}" stroke="${grid}" stroke-width="${u.toFixed(2)}"/>`); }
+// o.anim: fly to the new framing; o.keep: leave the framing alone; o.draw: animate the threads in.
+function paintMap(o = {}) {
+  if (!mapSvg) return;
+  cancelAnimationFrame(flight);
+  const target = o.keep ? curView : targetView();
+  const finish = () => { setView(target); renderDyn(target, { threads: true, draw: !!o.draw }); };
+  if (o.anim && !o.keep) flyTo(target, finish); else finish();
+  paintZoomBtn();
+  paintCaption();
+}
 
+function renderDyn(v, o) {
+  const cw = mapSvg.getBoundingClientRect().width || 600;
+  const u = v.w / cw;
+  const f = n => n.toFixed(2);
+  const { A, B, results, dests } = content();
+  const selIdx = results.length ? Math.min(state.sel, results.length - 1) : -1;
+  const D = selIdx >= 0 ? dests[selIdx] : null;
+  const inView = (p, m = 0) => p.x > v.x - m && p.x < v.x + v.w + m && p.y > v.y - m && p.y < v.y + v.h + m;
+  const taken = [{ x0: v.x + v.w - 132 * u, x1: v.x + v.w, y0: v.y, y1: v.y + 48 * u }]; // keep the zoom button clear
+  const hit = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+  const around = (p, r) => ({ x0: p.x - r * u, y0: p.y - r * u, x1: p.x + r * u, y1: p.y + r * u });
+  const originLabels = [];
+  const L = { dots: [], threads: [], rings: [], tags: [], pins: [], labels: [] };
+
+  // quiet dots for every airport city that is not otherwise drawn
   const special = new Set([A && A.code, B && B.code, ...dests.map(c => c && c.code)]);
   for (const c of state.cities) {
     if (special.has(c.code)) continue;
     const p = proj(c.lat, c.lon);
-    out.push(`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(2.6 * u).toFixed(2)}" fill="var(--ink)" fill-opacity=".28"/>`);
+    if (inView(p)) L.dots.push(`<circle cx="${f(p.x)}" cy="${f(p.y)}" r="${f(2.4 * u)}" fill="var(--ink)" fill-opacity=".3"/>`);
   }
 
+  // threads from each origin to the selected destination
   const pD = D ? proj(D.lat, D.lon) : null;
-  if (pD) {
-    const draw = animate && !reduceMotion();
+  if (pD && o.threads) {
+    const draw = o.draw && !reduceMotion();
     [[A, "var(--a)", 0], [B, "var(--b)", 0.12]].forEach(([c, col, delay]) => {
-      if (!c) return;
-      out.push(`<path pathLength="1" class="thread${draw ? " draw" : ""}" style="animation-delay:${delay}s" d="${arc(proj(c.lat, c.lon), pD)}" stroke="${col}" stroke-width="${(3.6 * u).toFixed(2)}"/>`);
+      if (c) L.threads.push(`<path pathLength="1" class="thread${draw ? " draw" : ""}" style="animation-delay:${delay}s" d="${arc(proj(c.lat, c.lon), pD)}" stroke="${col}" stroke-width="${f(3.6 * u)}"/>`);
     });
   }
 
-  dests.forEach((c, i) => {
-    if (!c || i === selIdx) return;
-    const p = proj(c.lat, c.lon);
-    out.push(`<g data-i="${i}" style="cursor:pointer"><title>${esc(results[i].destination.city)}</title><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(15 * u).toFixed(2)}" fill="transparent"/><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(5.5 * u).toFixed(2)}" fill="var(--surface)" stroke="var(--ink)" stroke-width="${(1.6 * u).toFixed(2)}"/></g>`);
-  });
-
-  [[A, "var(--a)", state.a], [B, "var(--b)", state.b]].forEach(([c, col, o]) => {
+  // origin pins and their names
+  const anchor = p => { const rx = (p.x - v.x) / v.w; return rx < 0.14 ? "start" : rx > 0.86 ? "end" : "middle"; };
+  const label = (p, t, dy, size) => {
+    const an = anchor(p), w = textW(t, size) * u, h = size * u, yb = p.y + dy * u;
+    const x0 = an === "start" ? p.x : an === "end" ? p.x - w : p.x - w / 2;
+    const lr = { x0, x1: x0 + w, y0: yb - h, y1: yb + 3 * u };
+    if (taken.some(t => hit(lr, t))) return; // a name that would sit on top of another is left out
+    taken.push(lr);
+    L.labels.push(`<text x="${f(p.x)}" y="${f(yb)}" text-anchor="${an}" font-size="${f(size * u)}" font-weight="650" fill="var(--ink)" stroke-width="${f(4 * u)}">${esc(t)}</text>`);
+  };
+  [[A, "var(--a)", state.a], [B, "var(--b)", state.b]].forEach(([c, col, opt]) => {
     if (!c) return;
     const p = proj(c.lat, c.lon);
-    out.push(`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(8 * u).toFixed(2)}" fill="${col}"/><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(3 * u).toFixed(2)}" fill="var(--surface)"/>`);
-    out.push(label(p, o.city, -16));
+    if (!inView(p)) return;
+    taken.push(around(p, 10));
+    L.pins.push(`<circle cx="${f(p.x)}" cy="${f(p.y)}" r="${f(8 * u)}" fill="${col}"/><circle cx="${f(p.x)}" cy="${f(p.y)}" r="${f(3 * u)}" fill="var(--surface)"/>`);
+    originLabels.push(() => label(p, opt.city, -16, 14));
   });
   if (pD) {
-    out.push(`<circle cx="${pD.x.toFixed(1)}" cy="${pD.y.toFixed(1)}" r="${(12 * u).toFixed(2)}" fill="var(--surface)" stroke="var(--ink)" stroke-width="${(3 * u).toFixed(2)}"/><circle cx="${pD.x.toFixed(1)}" cy="${pD.y.toFixed(1)}" r="${(5 * u).toFixed(2)}" fill="var(--ink)"/>`);
-    out.push(label(pD, results[selIdx].destination.city, 30, 15));
+    taken.push(around(pD, 14));
+    L.pins.push(`<circle cx="${f(pD.x)}" cy="${f(pD.y)}" r="${f(12 * u)}" fill="var(--surface)" stroke="var(--ink)" stroke-width="${f(3 * u)}"/><circle cx="${f(pD.x)}" cy="${f(pD.y)}" r="${f(5 * u)}" fill="var(--ink)"/>`);
   }
-  mapSvg.innerHTML = out.join("");
+  originLabels.forEach(fn => fn());
+  dests.forEach((c, i) => { if (c && i !== selIdx) taken.push(around(proj(c.lat, c.lon), 7)); });
 
-  // caption
+  // price tags: the selected one first, then cheapest to dearest; a tag is skipped when it cannot fit without overlap
+  const free = r => !taken.some(t => hit(r, t)) && r.x0 >= v.x + 2 * u && r.x1 <= v.x + v.w - 2 * u && r.y0 >= v.y + 2 * u && r.y1 <= v.y + v.h - 2 * u;
+  const place = (p, W, H) => {
+    for (const d of [9, 24, 42]) {
+      const g = d * u, s = d * 0.7 * u;
+      const cands = [[g, -H / 2], [-g - W, -H / 2], [-W / 2, -g - H], [-W / 2, g], [s, -s - H], [-s - W, -s - H], [s, s], [-s - W, s]];
+      for (const [dx, dy] of cands) {
+        const r = { x0: p.x + dx, y0: p.y + dy, x1: p.x + dx + W, y1: p.y + dy + H, far: d > 9 };
+        if (free(r)) return r;
+      }
+    }
+    return null;
+  };
+  const order = results.map((_, i) => i).filter(i => dests[i] && i !== selIdx);
+  if (selIdx >= 0 && dests[selIdx]) order.unshift(selIdx);
+  for (const i of order) {
+    const p = proj(dests[i].lat, dests[i].lon), sel = i === selIdx;
+    if (!sel) {
+      if (!inView(p)) continue;
+      L.rings.push(`<g data-i="${i}" style="cursor:pointer"><title>${esc(results[i].destination.city)}</title><circle cx="${f(p.x)}" cy="${f(p.y)}" r="${f(15 * u)}" fill="transparent"/><circle cx="${f(p.x)}" cy="${f(p.y)}" r="${f(5.5 * u)}" fill="var(--surface)" stroke="var(--ink)" stroke-width="${f(1.6 * u)}"/></g>`);
+    }
+    const fs = sel ? 13 : 12, price = fmt(results[i].total, results[i].currency), txt = sel ? `${results[i].destination.city} ${price}` : price;
+    const W = (textW(txt, fs) + 14) * u, H = (sel ? 26 : 20) * u;
+    const r = place(p, W, H);
+    if (!r && !sel) continue;
+    const rr = r || { x0: p.x + 9 * u, y0: p.y - H / 2, x1: p.x + 9 * u + W, y1: p.y + H / 2 };
+    taken.push(rr);
+    if (rr.far) L.rings.push(`<line x1="${f(p.x)}" y1="${f(p.y)}" x2="${f(clamp(p.x, rr.x0, rr.x1))}" y2="${f(clamp(p.y, rr.y0, rr.y1))}" stroke="rgba(18,38,58,.5)" stroke-width="${f(u)}"/>`);
+    L.tags.push(`<g data-i="${i}" style="cursor:pointer"><title>${esc(results[i].destination.city)}</title><rect x="${f(rr.x0)}" y="${f(rr.y0)}" width="${f(W)}" height="${f(H)}" rx="${f(5 * u)}" fill="${sel ? "var(--ink)" : "var(--surface)"}" stroke="${sel ? "none" : "rgba(18,38,58,.55)"}" stroke-width="${f(u)}"/><text class="tt" x="${f(rr.x0 + W / 2)}" y="${f(rr.y0 + H / 2)}" text-anchor="middle" dominant-baseline="central" font-size="${f(fs * u)}" font-weight="650" fill="${sel ? "var(--paper)" : "var(--ink)"}">${esc(txt)}</text></g>`);
+  }
+  dynG.innerHTML = [L.dots, L.threads, L.rings, L.tags, L.pins, L.labels].map(a => a.join("")).join("");
+}
+
+function paintZoomBtn() {
+  if (!zoomBtn) return;
+  const { A, B, dests } = content();
+  zoomBtn.hidden = ![A, B, ...dests].some(Boolean);
+  zoomBtn.textContent = state.mapMode === "world" ? "Avvicina" : "Vedi il mondo";
+}
+
+function paintCaption() {
+  if (!capEl) return;
+  const { results } = content();
+  const selIdx = results.length ? Math.min(state.sel, results.length - 1) : -1;
   let cap;
   if (selIdx >= 0 && state.a && state.b) {
     const r = results[selIdx];
@@ -431,7 +541,7 @@ function paintMap(animate) {
   } else {
     cap = "Le due città compaiono qui appena le scegli.";
   }
-  if (capEl) capEl.innerHTML = cap;
+  capEl.innerHTML = cap;
 }
 
 // ---------- provider badge (updated in place) ----------
@@ -461,12 +571,12 @@ function App(animate) {
     const ok = state.a && state.b && !sameCity() && state.depart;
     go.disabled = !(ok && !state.loading);
     warn.hidden = !sameCity();
-    paintMap(false);
   };
+  const onCity = kind => { refreshGo(); paintMap(kind === "type" ? { keep: true } : { anim: true }); };
 
   const title = el("h1", { class: "ask-title" },
-    "Da ", cityInput("a", "la tua città", "Prima città di partenza", refreshGo),
-    " e da ", cityInput("b", "la sua città", "Seconda città di partenza", refreshGo),
+    "Da ", cityInput("a", "la tua città", "Prima città di partenza", onCity),
+    " e da ", cityInput("b", "la sua città", "Seconda città di partenza", onCity),
     ", dove ci vediamo?");
 
   const dDep = el("input", { type: "date", value: state.depart, min: todayISO(), "aria-label": "Data di andata" });
@@ -509,14 +619,11 @@ function App(animate) {
   // map + results
   const pane = el("div", { class: "pane" });
   fillPane(pane);
-  mapSvg = document.createElementNS(NS, "svg");
-  mapSvg.setAttribute("viewBox", `0 0 ${VW} ${VH}`);
-  mapSvg.setAttribute("role", "img");
-  mapSvg.setAttribute("aria-label", "Mappa dell'Europa con le città di partenza e i punti d'incontro");
-  mapSvg.addEventListener("click", e => { const g = e.target.closest("[data-i]"); if (g) select(+g.dataset.i, true); });
+  ensureMap();
+  zoomBtn = el("button", { type: "button", class: "zoom", onclick: () => { state.mapMode = state.mapMode === "world" ? "fit" : "world"; paintMap({ anim: true }); } });
   capEl = el("p", { class: "cap" });
   wrap.append(el("section", { class: "board", id: "board", "aria-live": "polite" }, pane,
-    el("div", { class: "map-wrap" }, el("div", { class: "map" }, mapSvg), capEl)));
+    el("div", { class: "map-wrap" }, el("div", { class: "map" }, mapSvg, zoomBtn), capEl)));
 
   wrap.append(el("footer", { class: "foot" },
     el("span", {}, "Fatto per scegliere dove vedersi senza litigare sul prezzo."),
@@ -524,7 +631,7 @@ function App(animate) {
 
   root.append(wrap);
   refreshGo();
-  paintMap(!!animate);
+  paintMap({ anim: true, draw: !!animate });
   paintProvider();
 }
 
@@ -537,13 +644,13 @@ async function useExample(x, y) {
   const [ra, rb] = await Promise.all([API.search(x), API.search(y)]);
   if (!ra[0] || !rb[0]) return;
   state.a = ra[0]; state.textA = ra[0].text; state.b = rb[0]; state.textB = rb[0].text;
-  state.data = null; state.error = ""; state.sel = 0;
+  state.data = null; state.error = ""; state.sel = 0; state.mapMode = "fit";
   App();
 }
 
 async function run() {
   if (!(state.a && state.b && !sameCity() && state.depart)) return;
-  state.loading = true; state.error = ""; state.data = null; state.sel = 0;
+  state.loading = true; state.error = ""; state.data = null; state.sel = 0; state.mapMode = "fit";
   App(); scrollToBoard();
   try {
     const res = await API.meeting({
@@ -557,13 +664,13 @@ async function run() {
 }
 
 let rt;
-addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => paintMap(false), 120); });
+addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => paintMap({}), 120); });
 
 App();
 API.cities().then(list => {
   state.cities = list;
   list.forEach(c => c.codes.forEach(code => cityByCode.set(code, c)));
-  paintMap(false);
+  paintMap({});
 });
 API.provider().then(p => { if (p) { state.provider = p; paintProvider(); } });
 </script>
